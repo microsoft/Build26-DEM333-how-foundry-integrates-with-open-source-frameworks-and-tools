@@ -18,6 +18,14 @@ Key constraints:
 - The `_remove-before-publish/` folder is for source materials (abstracts, screenshots, notes). Its contents are gitignored — scan it for context but never try to commit files from it. Direct creators to put reference materials there, not in the repo root.
 - Use the Microsoft Learn MCP Server (configured in .vscode/mcp.json) to find relevant learn.microsoft.com links when populating resource sections.
 
+### DEM333 demo layout
+
+The session demo code lives under `src/dem333/`. When helping with code or documentation:
+- Use `src/dem333/README.md` as the source of truth for local run, AG-UI, hosted-agent, and tracing instructions.
+- Do not commit `.env`, `.venv/`, `.azure/`, App Insights connection strings, Azure OpenAI endpoints with tenant-specific secrets, or local deployment state.
+- Keep the protocol stack clear in docs: AG-UI connects user-facing apps to the coordinator, Responses exposes hosted agents, Microsoft Agent Framework orchestrates the coordinator workflow, A2A connects agents to agents, MCP connects agents to tools, and OpenTelemetry provides observability.
+- Validate Python changes from `src/dem333` with `python -m compileall -q agents src scripts`. Use the Copilot setup steps workflow as the expected cloud-agent bootstrap.
+
 ### Issue Support
 If a user asks for help filing an issue, or reports a problem:
 - Check `.github/ISSUE_TEMPLATE/` to discover available issue templates

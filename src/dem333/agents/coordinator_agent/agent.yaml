@@ -1,0 +1,36 @@
+kind: hosted
+name: dem333-coordinator-agent
+description: DEM333 MAF action coordinator that delegates through Responses/A2A and performs skills/MCP actions.
+protocols:
+  - protocol: responses
+    version: 1.0.0
+resources:
+  cpu: "0.25"
+  memory: "0.5Gi"
+environment_variables:
+  - name: APPLICATION_INSIGHTS_CONNECTION_STRING
+    value: ${APPLICATION_INSIGHTS_CONNECTION_STRING}
+  - name: DEM333_CONSOLE_TRACES
+    value: ${DEM333_CONSOLE_TRACES}
+  - name: DEM333_LANGCHAIN_TRACING
+    value: ${DEM333_LANGCHAIN_TRACING}
+  - name: DEM333_TRACE_CONTENT
+    value: ${DEM333_TRACE_CONTENT}
+  - name: DEM333_COORDINATOR_TRANSPORT
+    value: ${DEM333_COORDINATOR_TRANSPORT}
+  - name: AZURE_OPENAI_ENDPOINT
+    value: ${AZURE_OPENAI_ENDPOINT}
+  - name: AZURE_OPENAI_CHAT_DEPLOYMENT_NAME
+    value: ${AZURE_OPENAI_CHAT_DEPLOYMENT_NAME}
+  - name: AZURE_OPENAI_API_VERSION
+    value: ${AZURE_OPENAI_API_VERSION}
+  - name: AZURE_OPENAI_MODEL_NAME
+    value: ${AZURE_OPENAI_MODEL_NAME}
+  - name: POLICY_AGENT_A2A_URL
+    value: ${POLICY_AGENT_A2A_URL}
+  - name: ITINERARY_AGENT_A2A_URL
+    value: ${ITINERARY_AGENT_A2A_URL}
+  - name: POLICY_AGENT_RESPONSES_URL
+    value: ${POLICY_AGENT_RESPONSES_URL}
+  - name: ITINERARY_AGENT_RESPONSES_URL
+    value: ${ITINERARY_AGENT_RESPONSES_URL}

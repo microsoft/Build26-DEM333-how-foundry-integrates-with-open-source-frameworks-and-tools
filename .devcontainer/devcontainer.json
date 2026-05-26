@@ -1,0 +1,29 @@
+{
+  "name": "Build26 DEM333",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        "github.copilot",
+        "github.copilot-chat"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "${workspaceFolder}/src/dem333/.venv/bin/python",
+        "python.analysis.extraPaths": [
+          "${workspaceFolder}/src/dem333/src"
+        ]
+      }
+    }
+  },
+  "postCreateCommand": "cd src/dem333 && python -m venv .venv && . .venv/bin/activate && python -m pip install --upgrade pip && python -m pip install -r requirements.txt",
+  "remoteEnv": {
+    "PYTHONPATH": "${containerWorkspaceFolder}/src/dem333/src"
+  }
+}

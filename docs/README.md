@@ -1,16 +1,14 @@
-# /docs
+# DEM333 documentation
 
-This folder is for documentation and step-by-step content for your session.
+This folder is the documentation landing page for DEM333.
 
-## What goes here
+## Available material
 
-- **Labs/Workshops**: Step-by-step instructions organized into numbered exercises (e.g., `01-setup/`, `02-first-exercise/`)
-- **Demos**: Walkthrough documentation explaining the demo code in `/src`
-- **Breakouts**: Supplementary documentation, diagrams, or reference material
+- [Demo source and runbook](../src/dem333/README.md)
+- [Rough talk script](../src/dem333/docs/talk-script.md)
+- [AG-UI gateway instructions](../src/dem333/README.md#ag-ui-gateway)
+- [Hosted-agent handoff](../src/dem333/README.md#hosted-agent-handoff)
 
-## Tips
+## Demo summary
 
-- Use numbered prefixes for ordering: `01-setup/`, `02-exercise/`, `03-wrap-up/`
-- Each subfolder can have its own `README.md` or `index.md`
-- Keep images in an `assets/` subfolder if needed
-- If your session doesn't have documentation beyond the README, feel free to remove this folder
+DEM333 shows a Foundry-hosted multi-agent system built with open frameworks and protocols. A user-facing application can connect through AG-UI, the coordinator is exposed through Responses, specialists can be invoked through A2A, the itinerary specialist uses LangGraph, policy and readiness work is packaged as skills, operational actions happen through MCP tools, and OpenTelemetry ties the full run together for Foundry/App Insights observability.

@@ -1,0 +1,16 @@
+azure-ai-agentserver-core==2.0.0b3
+azure-ai-agentserver-responses==1.0.0b5
+azure-identity==1.25.3
+azure-monitor-opentelemetry-exporter==1.0.0b52
+agent-framework-core==1.5.0
+ag-ui-protocol==0.1.18
+fastapi==0.136.3
+httpx==0.28.1
+langchain-azure-ai[opentelemetry]==1.2.3
+langchain-openai==1.2.1
+langgraph==1.1.8
+mcp==1.22.0
+opentelemetry-api==1.40.0
+opentelemetry-sdk==1.40.0
+python-dotenv==1.2.1
+typing-extensions==4.15.0
