@@ -111,6 +111,29 @@ Expected stream highlights:
 - `TEXT_MESSAGE_*` streaming the final coordinator answer
 - `RUN_FINISHED` or `RUN_ERROR`
 
+### Deploy the AG-UI gateway
+
+The AG-UI gateway is not a Foundry hosted agent. Deploy it as a small web runtime in front of the Foundry coordinator, for example with Azure Container Apps:
+
+```bash
+az acr build \
+  --registry <acr-name> \
+  --image dem333-agui-gateway:<tag> \
+  --platform linux/amd64 \
+  --source-acr-auth-id "[caller]" \
+  --file Dockerfile.agui .
+```
+
+Set these runtime environment variables:
+
+```bash
+DEM333_COORDINATOR_RESPONSES_URL=<deployed coordinator Responses endpoint>
+APPLICATION_INSIGHTS_CONNECTION_STRING=<same App Insights connection string as the agents>
+PORT=8080
+```
+
+Assign the gateway's managed identity `Azure AI User` on the Foundry account so it can call the coordinator Responses endpoint with `DefaultAzureCredential`.
+
 ## Hosted-agent handoff
 
 Each agent folder includes an `agent.yaml` and `Dockerfile`. Build each image from the `dem333` root so the Dockerfile can copy the shared `src/` package:
