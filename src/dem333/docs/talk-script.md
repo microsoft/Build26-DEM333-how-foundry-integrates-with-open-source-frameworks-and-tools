@@ -26,11 +26,16 @@ What to point at:
 
 - `src/dem333_common/agui_gateway.py`
 - endpoint `POST /agui`
-- events: `RUN_STARTED`, `STATE_SNAPSHOT`, `TOOL_CALL_*`, `TEXT_MESSAGE_*`, `RUN_FINISHED`
+- the AG-UI stream in the terminal or frontend: `RUN_STARTED`, `STATE_SNAPSHOT`, `STEP_STARTED`, `TOOL_CALL_*`, `TEXT_MESSAGE_*`, `RUN_FINISHED`
+- the nested coordinator call that AG-UI surfaces as `dem333_coordinator_responses`
 
 Stage line:
 
-"So the protocol stack is layered: AG-UI connects user to agent, A2A connects agent to agent, MCP connects agent to tools, and OpenTelemetry lets us inspect the whole thing."
+"So the protocol stack is layered: AG-UI connects user to agent, Responses gives us a hosted agent API, A2A connects agent to agent, MCP connects agent to tools, and OpenTelemetry lets us inspect the whole thing."
+
+Optional live line:
+
+"If I open an AG-UI client, it does not need to understand our internal MAF or LangGraph code. It sees a standard event stream: run started, state snapshot, tool call to the coordinator, streamed final text, and run finished."
 
 ## 4. Show the coordinator
 
