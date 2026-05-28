@@ -12,6 +12,7 @@ The session demo source is in [`dem333/`](dem333/).
 - Agent Framework skills
 - AG-UI HTTP/SSE gateway
 - OpenTelemetry tracing helpers
+- Interactive talk plan for Outlook MCP and Copilot CLI external-agent observability
 - Dockerfiles, Foundry agent metadata, and Azure infrastructure scaffold
 
 ## Quick start
@@ -25,4 +26,4 @@ cp .env.example .env
 python3 scripts/run_demo.py
 ```
 
-See [`dem333/README.md`](dem333/README.md) for full setup, AG-UI, hosted-agent, and tracing instructions.
+See [`dem333/README.md`](dem333/README.md) for full setup, AG-UI, hosted-agent, tracing instructions, and the interactive talk plan.

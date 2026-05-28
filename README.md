@@ -43,7 +43,7 @@ Once your content is in the repo, use these three phrases with Copilot to build 
 
 ### Session Description
 
-In this demo, we'll show how Microsoft Foundry integrates with the open-source tools developers already use so you can build agents your way and deploy them with enterprise-grade hosting and observability built in. We'll start with Microsoft Agent Framework, bring in a LangGraph specialist, connect agents with A2A, expose the experience to user-facing apps with AG-UI, perform safe tool actions through MCP and skills, and inspect the full multi-agent run with OpenTelemetry.
+In this interactive demo, we'll show how Microsoft Foundry integrates with the open-source tools developers already use so you can build agents your way and deploy them with enterprise-grade hosting and observability built in. Fauncdo will keep asking for new capabilities, Nagkumar will add them live, and the trace will show each layer: Outlook email through MCP, Microsoft Agent Framework orchestration, a LangGraph specialist, skills, hosted Responses agents, A2A handoffs, AG-UI streaming, and Copilot CLI registered as an external agent whose A2A call lands in the same OpenTelemetry view.
 
 ### 🚀 Getting started
 
@@ -82,8 +82,9 @@ The main demo lives in [`src/dem333`](src/dem333/). To explore it locally:
 By the end of this session, you will be able to:
 
 - Explain how Foundry can host and observe agents built with open frameworks and protocols.
-- Connect a Microsoft Agent Framework coordinator to LangGraph and policy specialists through Responses and A2A.
-- Use OpenTelemetry traces to inspect model calls, agent handoffs, MCP tool actions, skills, latency, and failures across a multi-agent workflow.
+- Connect a Microsoft Agent Framework coordinator to LangGraph and policy specialists through hosted Responses endpoints and A2A.
+- Use MCP to add external capabilities such as Outlook email access while keeping tools explicit, permissioned, and observable.
+- Trace hosted and external agents together, including Copilot CLI making an A2A call into the Foundry-hosted system.
 
 ### 💬 Keep Learning with Copilot
 
@@ -116,7 +117,9 @@ Use these as a starting point — or write your own!
 1. [LangGraph](https://langchain-ai.github.io/langgraph/)
 1. [OpenTelemetry with Azure Monitor](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-enable)
 1. [Model Context Protocol](https://modelcontextprotocol.io/)
+1. [Agent-to-agent endpoints in Foundry](https://learn.microsoft.com/azure/ai-foundry/agents/how-to/enable-agent-to-agent-endpoint)
 1. [Agent User Interaction Protocol](https://docs.ag-ui.com/introduction)
+1. [Foundry external agents observability sample](https://github.com/microsoft-foundry/foundry-samples/tree/main/samples/python/external-agents/observability)
 1. [Azure OpenAI in Foundry Models](https://learn.microsoft.com/azure/ai-foundry/openai/)
 
 ### 📚 Resources and Next Steps
@@ -125,9 +128,11 @@ Use these as a starting point — or write your own!
 | :--- | :--- |
 | [https://aka.ms/build26-next-steps](https://aka.ms/build26-next-steps) | Explore lab and session repos to further your learning from Microsoft Build |
 | [DEM333 demo source](src/dem333/) | Source code, local runner, Dockerfiles, Foundry agent metadata, and AG-UI gateway for the session demo |
-| [DEM333 talk script](src/dem333/docs/talk-script.md) | Rough speaker script, stage directions, and trace callouts |
+| [DEM333 interactive demo plan](src/dem333/docs/interactive-demo-plan.md) | Live demo arc for Outlook MCP, hosted agents, AG-UI, Copilot CLI external-agent tracing, and fallback paths |
+| [DEM333 talk script](src/dem333/docs/talk-script.md) | Back-and-forth speaker script, stage directions, and trace callouts |
 | [Microsoft Foundry documentation](https://learn.microsoft.com/azure/ai-foundry/) | Learn how to build, deploy, evaluate, and observe AI apps and agents in Foundry |
 | [Microsoft Agent Framework documentation](https://learn.microsoft.com/agent-framework/) | Learn how to build workflow-based and agent-based applications with Microsoft Agent Framework |
+| [Foundry external agents observability sample](https://github.com/microsoft-foundry/foundry-samples/tree/main/samples/python/external-agents/observability) | Reference for registering and tracing Copilot CLI as an external agent in the final demo beat |
 | [Azure Monitor OpenTelemetry documentation](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-enable) | Configure OpenTelemetry export to Azure Monitor and Application Insights |
 
 

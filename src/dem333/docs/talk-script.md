@@ -1,127 +1,138 @@
-# DEM333 rough talk script
+# DEM333 interactive talk script
 
-## 0. Setup line
+## Cast
 
-"In this demo, I want to show how we can take agents built with open Python frameworks and protocols, bring them into Foundry, connect them to a user-facing application with AG-UI, connect them to each other through agent-to-agent handoffs, and still operate the whole system with trace-level observability."
+- **Fauncdo**: audience proxy, keeps asking "can the agent also do this?"
+- **Nagkumar**: live builder, makes small changes and shows the result.
 
-## 1. Problem framing
+## Opening
 
-"Most teams do not have one monolithic agent. They have a mix: one team may build a LangGraph agent, another may expose a hosted Responses agent, another may package repeatable work as skills or MCP tools, and the product team still needs a user-facing app. The hard part is not just building an agent; it is connecting users, agents, tools, and observability without custom glue everywhere."
+**Nagkumar:** "Instead of showing a finished black box, we are going to build this demo interactively. Fauncdo will keep pushing the agent with new asks, I will add one capability at a time, and then we will inspect the exact trace so you can see how Foundry hosts and observes the system."
 
-## 2. Introduce the scenario
+**Fauncdo:** "So this is not just a prompt demo?"
 
-"Our sample is an executive customer-visit planner. The user asks for a compliant two-day Seattle visit for a healthcare customer. That sounds simple, but it actually needs several kinds of work: itinerary planning, policy review, briefing prep actions, and a final executive-ready synthesis."
+**Nagkumar:** "Right. The goal is to show the open surfaces developers actually use: MCP for tools, Microsoft Agent Framework for workflow, LangGraph for specialist logic, skills for repeatable actions, Responses for hosted agent APIs, A2A for agent-to-agent calls, AG-UI for user-facing streams, and OpenTelemetry for observability."
 
-Suggested prompt:
+## Beat 0: Baseline hosted coordinator
+
+**Fauncdo:** "What do we already have running?"
+
+**Nagkumar:** "We start with a coordinator hosted in Foundry. It exposes a Responses endpoint, so I can invoke it like a normal hosted agent."
+
+**Stage direction:** Run the baseline request against the coordinator.
 
 ```text
-Plan a 2-day customer visit to Seattle for a healthcare customer. Make it executive-friendly, keep it compliant, and go ahead with the safe prep actions needed for the briefing.
+Summarize what you can help with for an executive customer visit.
 ```
 
-## 3. Show AG-UI as the user-facing layer
+**Nagkumar:** "At this point the agent can plan, but it does not yet know anything about my mailbox. In Foundry, the trace starts with the hosted invocation and the Responses request."
 
-"Before we even get to agent-to-agent, we need a way for a user-facing app to talk to this system. That is where AG-UI fits. It is an event protocol for streaming runs, messages, tool calls, state, and errors to a frontend."
+**Trace callout:** Point to the hosted-agent root span and `dem333.surface=responses-protocol`.
 
-What to point at:
+## Beat 1: Add Outlook through MCP
 
-- `src/dem333_common/agui_gateway.py`
-- endpoint `POST /agui`
-- the AG-UI stream in the terminal or frontend: `RUN_STARTED`, `STATE_SNAPSHOT`, `STEP_STARTED`, `TOOL_CALL_*`, `TEXT_MESSAGE_*`, `RUN_FINISHED`
-- the nested coordinator call that AG-UI surfaces as `dem333_coordinator_responses`
+**Fauncdo:** "Can I ask the agent to get email?"
 
-Stage line:
+**Nagkumar:** "Yes, but I do not want email logic buried in the agent. I will connect Outlook through MCP so mail access is a tool surface with explicit permissions."
 
-"So the protocol stack is layered: AG-UI connects user to agent, Responses gives us a hosted agent API, A2A connects agent to agent, MCP connects agent to tools, and OpenTelemetry lets us inspect the whole thing."
+**Stage direction:** Apply the small prepared change that registers the Outlook/Microsoft Graph MCP server and updates the coordinator instructions to use the read-only mail summary tool.
 
-Optional live line:
+**Nagkumar:** "Now I can ask the same hosted agent a richer question."
 
-"If I open an AG-UI client, it does not need to understand our internal MAF or LangGraph code. It sees a standard event stream: run started, state snapshot, tool call to the coordinator, streamed final text, and run finished."
+```text
+Look at the latest emails for the Contoso customer visit and summarize what I need to respond to.
+```
 
-## 4. Show the coordinator
+**Fauncdo:** "The answer came back with email context. How do we know what happened?"
 
-"The coordinator is the front door. It is exposed through the Responses protocol, but internally it uses Microsoft Agent Framework as a workflow. The workflow has explicit stages: plan the delegation, call the specialists, perform actions, and synthesize the result."
+**Nagkumar:** "The trace shows a model call deciding to use a tool, an MCP tool call to Outlook, and a tool result returning only the demo-safe summary we allow."
 
-What to point at:
+**Trace callout:** Show `dem333.surface=mcp`, the Outlook tool name, latency, and a sanitized action receipt. Call out that a real production deployment should redact or sample sensitive mail content.
 
-- `agents/coordinator_agent/main.py`
-- `build_maf_coordinator()`
-- MAF executors: `DelegationPlannerExecutor`, `SpecialistCallExecutor`, `ActionExecutor`, `SynthesisExecutor`
+## Beat 2: Turn email into a plan
 
-Stage line:
+**Fauncdo:** "Can it turn those emails into an actual visit plan?"
 
-"This is intentionally not hidden in a prompt. The workflow structure is explicit, inspectable, and traceable."
+**Nagkumar:** "This is where I do not want one giant prompt. The coordinator uses Microsoft Agent Framework as an explicit workflow: plan the delegation, call specialists, perform actions, and synthesize the response."
 
-## 5. Show A2A delegation
+**Stage direction:** Route the Outlook summary into the existing coordinator workflow and itinerary specialist.
 
-"When hosted in Foundry, the coordinator can call the specialists over A2A. The specialists remain independent hosted agents, but now they are callable by another agent through a standard JSON-RPC `message/send` flow."
+```text
+Use those customer emails to create a two-day executive visit plan with meetings, prep work, and open questions.
+```
 
-What to point at:
+**Nagkumar:** "The itinerary specialist is built with LangGraph. It has nodes for parsing the request, drafting the schedule, critiquing it, taking safe prep actions, and formatting the answer."
 
-- `src/dem333_common/a2a_client.py`
-- span name `a2a.message_send <agent>`
-- `DEM333_COORDINATOR_TRANSPORT=a2a`
-- `POLICY_AGENT_A2A_URL`
-- `ITINERARY_AGENT_A2A_URL`
+**Fauncdo:** "So LangGraph is still LangGraph, but Foundry can host and observe it?"
 
-Stage line:
+**Nagkumar:** "Exactly. Foundry is not forcing every agent into one framework. The specialist can stay a LangGraph app while the coordinator calls it as a hosted agent."
 
-"This is the key interoperability moment: the coordinator is not importing specialist code. It is invoking other agents."
+**Trace callout:** Show `dem333.surface=maf` for workflow steps and `dem333.surface=langgraph` for itinerary nodes.
 
-## 6. Show the LangGraph specialist
+## Beat 3: Add policy and readiness checks
 
-"The itinerary specialist is built with LangGraph. It breaks the request into multiple graph nodes: parse the request, draft a schedule, critique it, perform prep actions, and format the answer."
+**Fauncdo:** "Can it tell us what is risky before we reply to the customer?"
 
-What to point at:
+**Nagkumar:** "I will add the policy specialist as another hosted agent and call it over A2A. The coordinator does not import that agent's code; it sends an A2A `message/send` request."
 
-- `agents/itinerary_agent/main.py`
-- `build_graph()`
-- nodes: `parse_request`, `draft_schedule`, `critique_schedule`, `perform_actions`, `format_answer`
+**Stage direction:** Enable or show the A2A endpoint for the policy specialist and configure the coordinator with the specialist URL.
 
-Stage line:
+```text
+Before I send this plan, check policy, privacy, accessibility, procurement, and commitment risks.
+```
 
-"This gives us a richer trace than one model call. We can see the reasoning workflow, not just the final answer."
+**Nagkumar:** "The response now includes a policy section and readiness receipts. Those receipts come from skills, which are useful for repeatable procedures that should be easy to name, trace, and govern."
 
-## 7. Show skills and MCP actions
+**Fauncdo:** "So A2A is the agent-to-agent part, and skills are the repeatable procedure part?"
 
-"The demo also shows two ways agents can perform work. Policy and readiness procedures are packaged as skills. Operational actions, like reserving a synthetic briefing room or creating a briefing artifact, are exposed through an MCP stdio server."
+**Nagkumar:** "Yes. A2A connects independent agents. Skills package repeatable work inside an agent. MCP connects agents to external tools like Outlook."
 
-What to point at:
+**Trace callout:** Show `dem333.surface=a2a`, `a2a.message_send`, and `dem333.surface=skill`.
 
-- Skills: `src/dem333_common/skills.py`
-- MCP server: `src/dem333_common/mcp_action_server.py`
-- MCP client: `src/dem333_common/mcp_action_client.py`
-- action receipts in the final answer
+## Beat 4: Show the user-facing stream with AG-UI
 
-Stage line:
+**Fauncdo:** "This is useful in a terminal, but can a frontend show what the agent is doing?"
 
-"These actions are demo-safe. They do not book real rooms or create real tickets; they return deterministic receipts so the audience can match the final answer to the trace."
+**Nagkumar:** "That is where AG-UI fits. It is the user-facing event stream. The frontend does not need to know whether the backend uses MAF, LangGraph, A2A, or MCP. It sees standard run, state, tool-call, text, and error events."
 
-## 8. Show observability
+**Stage direction:** Send the same request through the AG-UI gateway.
 
-"Now the most important part: we can open the trace and see the full run. Foundry gives us the hosted invocation, and our OpenTelemetry spans show the coordinator workflow, A2A handoffs, specialist work, LangGraph nodes, MCP tool calls, skills, and nested model calls."
+**Nagkumar:** "Watch the stream: `RUN_STARTED`, `STATE_SNAPSHOT`, a tool call to the coordinator, streamed text, and `RUN_FINISHED`."
 
-Trace checklist:
+**Fauncdo:** "So AG-UI is not replacing A2A?"
 
-- `dem333.surface=responses-protocol`
-- `dem333.surface=ag-ui`
-- `dem333.surface=maf`
-- `dem333.surface=a2a`
-- `dem333.surface=langgraph`
-- `dem333.surface=mcp`
-- `dem333.surface=skill`
-- `gen_ai.input.messages`
-- `gen_ai.output.messages`
-- `gen_ai.operation.name=invoke_agent`
-- `gen_ai.operation.name=execute_tool`
+**Nagkumar:** "Right. AG-UI connects the user experience to the agent system. A2A connects agents to other agents. MCP connects agents to tools. OpenTelemetry ties all of it together."
 
-Stage line:
+**Trace callout:** Show `dem333.surface=ag-ui` followed by the nested coordinator call.
 
-"This is what turns a multi-agent demo from magic into an operable system. I can see who called whom, what each model saw, what tools ran, how long each step took, and where I would debug if something failed."
+## Beat 5: Copilot CLI as an external agent making an A2A call
 
-## 9. Close
+**Fauncdo:** "What if the caller is not our app? Can another agent call this agent?"
 
-"The takeaway is that Foundry does not require every agent to be written the same way. You can bring agents built with open frameworks and protocols, expose them to apps with AG-UI and Responses, connect them with A2A, give them tools with MCP, and use OpenTelemetry to understand and govern the end-to-end behavior."
+**Nagkumar:** "I will spin up Copilot CLI as the caller. For the demo, Copilot CLI is registered as an external agent using the Foundry external-agent observability sample, and its SDK traces export to the same Application Insights resource."
 
-## Short fallback script
+**Stage direction:** Start the Copilot CLI flow and ask it to call the DEM333 coordinator over A2A.
 
-"If anything fails live, the story still holds: the local runner shows the same architecture with Responses calls instead of hosted A2A, console spans instead of App Insights, and deterministic MCP/skill receipts instead of real external side effects. The core pattern is the same: build agents with open frameworks, connect them through standard protocols, and observe every step."
+```text
+Call the DEM333 coordinator over A2A. Ask it to summarize the latest Contoso visit emails, produce a compliant visit plan, and return the policy risks.
+```
+
+**Nagkumar:** "Now Copilot CLI is not just a terminal helper. In the trace it appears as an external agent that calls the Foundry-hosted coordinator through A2A."
+
+**Fauncdo:** "And the same trace still includes Outlook, the specialists, and the final response?"
+
+**Nagkumar:** "Yes. This is the payoff: an external agent, an A2A handoff, hosted Foundry agents, MCP Outlook access, LangGraph specialist work, skills, and model calls all show up in the same observability story."
+
+**Trace callout:** Open Foundry/App Insights and follow the span chain: `external-agent` -> `a2a` -> hosted coordinator -> MAF workflow -> Outlook MCP -> policy specialist -> itinerary specialist -> LangGraph nodes -> skill receipts -> final response.
+
+## Closing
+
+**Nagkumar:** "The takeaway is that Foundry lets us bring open frameworks and protocols into an enterprise agent platform. We did not rewrite the app each time Fauncdo asked for a new capability. We added one interoperable surface at a time."
+
+**Fauncdo:** "And the audience can see not only that it worked, but how it worked."
+
+**Nagkumar:** "Exactly. The demo is not magic. It is a hosted, observable system: MCP for tools, MAF and LangGraph for agent logic, skills for repeatable procedures, Responses and A2A for agent APIs, AG-UI for the user experience, and OpenTelemetry so Foundry can help us debug, govern, and operate it."
+
+## Fallback script
+
+If live Outlook auth or tenant access fails, use a seeded email fixture and say: "The tool result is replayed from the same schema the Outlook MCP tool returns." If Copilot CLI tracing fails, show a captured trace from the same Application Insights resource and continue the story from the external-agent root span. The core message remains the same: each capability is connected through an open surface and observed through the same trace pipeline.

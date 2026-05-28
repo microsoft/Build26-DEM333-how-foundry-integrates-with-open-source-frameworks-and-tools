@@ -1,6 +1,6 @@
 # DEM333 multi-agent demo
 
-DEM333 is a Foundry-ready multi-agent demo that shows how a coordinator can bring specialist agents together through open agent surfaces, then use Foundry/App Insights observability to inspect the whole run. The current scenario is an executive customer-visit planner: the coordinator receives a complex request, delegates to itinerary and policy specialists, performs safe synthetic prep actions, and returns a final briefing plan with action receipts.
+DEM333 is a Foundry-ready multi-agent demo that shows how a coordinator can bring specialist agents together through open agent surfaces, then use Foundry/App Insights observability to inspect the whole run. The updated live plan makes the session interactive: Fauncdo asks for new capabilities, Nagkumar adds them in small steps, and the audience watches the hosted response and trace evolve. The scenario is an executive customer-visit planner that can start from Outlook email context, delegate to itinerary and policy specialists, perform safe prep actions, and return a final briefing plan with action receipts.
 
 ## What is in this folder
 
@@ -13,7 +13,7 @@ DEM333 is a Foundry-ready multi-agent demo that shows how a coordinator can brin
 | Local demo runner | `scripts/run_demo.py` | Starts all three agents locally, sends one coordinator request, prints the response, then dumps console OTel spans. |
 | Foundry deployment assets | `agents/*/Dockerfile`, `agents/*/agent.yaml` | Container and hosted-agent metadata for each agent. |
 | Azure infra | `infra/` | Azure Developer CLI/Bicep scaffolding for Foundry/App Insights infrastructure. |
-| Talk material | `docs/talk-script.md` | Rough speaker script, demo beats, trace callouts, and fallback narration. |
+| Talk material | `docs/interactive-demo-plan.md`, `docs/talk-script.md` | Interactive demo plan, back-and-forth speaker script, trace callouts, and fallback narration. |
 
 ## Demo surfaces
 
@@ -25,10 +25,24 @@ DEM333 is a Foundry-ready multi-agent demo that shows how a coordinator can brin
 | Microsoft Agent Framework | `coordinator_agent` uses MAF workflow executors for delegation, specialist calls, actions, and synthesis. |
 | Skills | `policy_agent` and `coordinator_agent` create action receipts through Agent Framework `InlineSkill` definitions. |
 | MCP | `itinerary_agent` and `coordinator_agent` call the official Python MCP SDK over stdio to `dem333-action-mcp` tools. |
+| Outlook MCP live beat | The talk plan layers an Outlook/Microsoft Graph MCP server onto the hosted coordinator so a demo mailbox can feed the visit plan. |
 | AG-UI | `dem333_common.agui_gateway` exposes an AG-UI HTTP/SSE endpoint that streams coordinator runs to user-facing apps. |
 | OpenTelemetry | Every surface stamps spans with `dem333.surface` plus GenAI semantic attributes for Foundry/App Insights inspection. |
+| External agent observability | The final talk beat uses Copilot CLI as an external agent, follows the [Foundry external agents observability sample](https://github.com/microsoft-foundry/foundry-samples/tree/main/samples/python/external-agents/observability), exports SDK traces to the same App Insights resource, and makes an A2A call into the hosted coordinator. |
 
-No GitHub Copilot dependency is used in this demo; all model calls go through Azure OpenAI/Foundry and local action tools are deterministic.
+The checked-in local demo remains deterministic and safe to run without Outlook or Copilot CLI. The live talk plan layers Outlook MCP and Copilot CLI external-agent tracing on top of the same hosted-agent architecture.
+
+## Interactive live plan
+
+The revised talk uses a back-and-forth format:
+
+1. Fauncdo asks whether the agent can read email.
+1. Nagkumar connects Outlook through MCP and shows a hosted response.
+1. Fauncdo asks for better planning, policy checks, a user-facing stream, and another agent calling this one.
+1. Nagkumar adds MAF/LangGraph orchestration, hosted A2A specialists, AG-UI, and finally Copilot CLI as an external agent that calls the coordinator over A2A.
+1. Each step ends in Foundry/App Insights so the audience can see the trace, not just the answer.
+
+See [`docs/interactive-demo-plan.md`](docs/interactive-demo-plan.md) and [`docs/talk-script.md`](docs/talk-script.md).
 
 ## Agent roles and actions
 
@@ -38,7 +52,7 @@ No GitHub Copilot dependency is used in this demo; all model calls go through Az
 | `dem333-itinerary-agent` | Builds the customer-visit plan with LangGraph. | Reserves a synthetic briefing room and creates an executive brief through MCP. |
 | `dem333-policy-agent` | Reviews compliance, privacy, accessibility, procurement, and commitment risks. | Creates human policy-review and readiness-checklist receipts through skills. |
 
-The actions are intentionally synthetic and demo-safe: they return receipts and trace attributes, but do not book real rooms, send emails, create tickets, or touch customer systems.
+The checked-in actions are intentionally synthetic and demo-safe: they return receipts and trace attributes, but do not book real rooms, send emails, create tickets, or touch customer systems. For the live Outlook beat, use a dedicated demo mailbox, read-only permissions, and sanitized trace content.
 
 ## Local run
 
@@ -169,6 +183,6 @@ Invoke the coordinator through the Foundry/Responses endpoint. The hosted trace 
 
 ## Talk narrative
 
-The short version: "We start with agents built in familiar Python frameworks. A user-facing app can connect through AG-UI, the coordinator is hosted behind the Responses API, specialists are exposed as A2A endpoints, the itinerary specialist uses LangGraph, policy/readiness work is packaged as skills, concrete prep actions happen through MCP tools, and every handoff and model call is visible with OpenTelemetry in Foundry."
+The short version: "We start with a hosted coordinator behind Responses. Fauncdo asks whether it can get email, so we connect Outlook through MCP. As the asks get richer, we add MAF orchestration, LangGraph and policy specialists over A2A, skills, AG-UI streaming, and finally Copilot CLI as an external agent making its own A2A call. Every handoff, tool call, and model call is visible with OpenTelemetry in Foundry."
 
-Use `docs/talk-script.md` for a rough speaker script and stage directions.
+Use `docs/interactive-demo-plan.md` for the live arc and `docs/talk-script.md` for the back-and-forth speaker script and stage directions.
