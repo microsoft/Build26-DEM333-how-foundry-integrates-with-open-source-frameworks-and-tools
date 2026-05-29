@@ -151,11 +151,11 @@ backend = CompositeBackend(
 
 **F:** OK — inbox is covered. The other thing OpenClaw is famous for is **browsing the web**. Nagku, what's our open-source story there?
 
-*(stage) **N** opens [src/dem333/tools/browser.py](src/dem333/tools/browser.py) briefly, then [src/dem333/skills/web-browsing/SKILL.md](src/dem333/skills/web-browsing/SKILL.md).*
+*(stage) **N** opens [src/dem333/skills/web-browsing/SKILL.md](src/dem333/skills/web-browsing/SKILL.md).*
 
-**N:** We could use an MCP server. However, a more popular approch these days is to use the command line. Microsoft just shipped **`@playwright/cli`** — a command-line wrapper around Playwright designed for agents. Instead of giving the model 40 fine-grained MCP tools (one per browser action), we give it **one tool**: `playwright_cli`, and a **skill** that teaches it the command vocabulary. Same pattern as before — the verbs live in markdown, not in the tool schema. That saves a huge amount of context.
+**N:** Playwright is an open-source framework that allows developers and testers to control browsers using a single API and write scripts to test functionality. In our case, I have Playwright installed in this computer so we can create an skill that tells the agent how to use the tool to navigate the web.
 
-**F:** Let's see it. Ask it the classic shopping question.
+**F:** Can we see it in action? Ask it for example to find the price of something on amazon.
 
 *(stage) Prompt in the agent:*
 
@@ -163,15 +163,21 @@ backend = CompositeBackend(
 
 *(stage) Spinner shows `skill: Web Browsing` loaded, then a sequence of `playwright_cli` calls: `open https://amazon.com`, `snapshot`, `type "microsoft coffee cup"`, `press Enter`, `snapshot`, `click e<n>`, `snapshot`. Final answer cites the URL and the price.*
 
-**F:** Three things to call out: the agent picked the *skill* on its own based on the prompt, it used a *single* tool with a free-form `args` string, and the persistent browser session means the next prompt can keep going from where we left off.
+**N:** Ok, let's see what it does now...
+
+**F:** While this runs, I'm wondering - is there an MCP Server we can use with playwright or why did we used a different approach?
+
+**N:** We could use an MCP server. However, a more popular approch these days is to use the command line. Microsoft just shipped **`@playwright/cli`** — a command-line wrapper around Playwright designed for agents. Instead of giving the model 40 fine-grained MCP tools (one per browser action), we give it **one tool**: `playwright_cli`, and a **skill** that teaches it the command vocabulary. Same pattern as before — the verbs live in markdown, not in the tool schema. That saves a huge amount of context.
+
+**F:** Three things to call out: the agent picked the *skill* on its own based on the prompt, it used a *single* tool with a free-form `args` string, and the persistent browser session means the next prompt can keep going from where we left off. That's smart!
 
 ---
 
 ## 8. From console to cloud — Responses API on Foundry — ⏱ 3 min
 
-**F:** OK Nagku, fair question from the audience: this is all running in a terminal on your laptop. What happens when I want to ship it? I don't want my customers SSH-ing into your machine.
+**F:** OK Nagku, fair question from the audience: this is all running in a terminal on your laptop. What happens when I want to ship it and share with others? I don't want my customers SSH-ing into your machine.
 
-**N:** This is the part where Foundry pays for itself. Foundry hosts agents behind the **OpenAI Responses API** — same protocol millions of developers already know. We don't rewrite the agent — we wrap it.
+**N:** This is the part where Foundry shines. Foundry hosts agents behind the **OpenAI Responses API** — same protocol millions of developers already know. We don't rewrite the agent — we wrap it.
 
 *(stage) **N** opens a small `server.py` that takes the same `build_agent(...)` function and exposes it as a Responses-compatible endpoint, then runs:*
 
@@ -183,11 +189,11 @@ backend = CompositeBackend(
 azd ....
 ```
 
-I have this agent already deployed so let's take a look.
+I have this agent already deployed so let's take a look to the playground.
 
 *(stage) Response streams back.*
 
-**F:** And critically — we did not have to learn a new agent framework to do that. Our agent stayed LangGraph.
+**F:** So our agent stayed LangGraph but we just wrapped and serve it on the Responses API.
 
 ---
 
@@ -195,15 +201,17 @@ I have this agent already deployed so let's take a look.
 
 **F:** One more thing... because our agent became a bit sophisticated right. How can we see what this agent is doing in details?
 
-**N:** Foundry implements OpenTelemetry using Semantic Conventions for GenAI, which is the same stack used across multiple agentic stacks including GitHub Copipot.
+**N:** I'm glad you ask because Foundry implements OpenTelemetry using Semantic Conventions for GenAI, which is the same stack used across multiple agentic stacks including GitHub Copipot.
 
 Let's take a look and see one of those traces.
 
 *(stage) show the traces.
 
+I can see the duration and also check where my agent is spending all the time and tokens.
+
 ## 10. A2A — calling our agent from Copilot CLI — ⏱ 2.5 min
 
-**F:** That's fantastic. But I got one more for you. Because I heard that 2026 is all about agents calling other agents. Is that a thing?
+**F:** Ok, last question. Because I heard that 2026 is all about agents calling other agents... can other agents talk with this agent? Is that a thing?
 
 **N:** Yes — Foundry exposes every hosted agent over the **A2A (Agent-to-Agent) protocol** automatically that allow agents to call other agents to create tasks. No extra config. That means any A2A-compatible client can discover and call it. Let's prove it with **GitHub Copilot CLI**.
 
@@ -219,13 +227,15 @@ copilot agent add --a2a $FOUNDRY_A2A_URL
 
 *(stage) Copilot CLI routes the request over A2A to our Foundry-hosted agent, which loads the inbox-triage skill, calls Work IQ Mail, and responds. Output appears inside Copilot CLI.*
 
-**F:** Stop and look at what just happened. **Copilot CLI** — a totally different agent runtime — called *our* LangGraph agent hosted in Foundry, which then used an MCP tool to read my mailbox, applied a skill, and answered. **None of those pieces had to know about each other.** That's the open-source story end-to-end.
+**F:** Stop and look at what just happened. **Copilot CLI** — a totally different agent runtime — called *our* LangGraph agent hosted in Foundry, which then used an MCP tool to read my mailbox, applied a skill, and answered. **None of those pieces had to know about each other.** That's the open-source story end-to-end we wanted to tell.
 
 ---
 
 ## Wrap-up — ⏱ 1 min
 
-**F:** I think this is enought for today, this code is available so clone it and you can run every step of what we just did.
+**F:** And that's the story we want all of you to take away from this session. 
+
+This code is available so clone it and you can run every step of what we just did.
 
 **N:** Thanks everyone. We'll stick around for questions.
 

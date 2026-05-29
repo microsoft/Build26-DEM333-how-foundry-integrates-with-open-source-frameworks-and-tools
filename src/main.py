@@ -203,9 +203,38 @@ async def _invoke_with_skill_notifications(agent, agent_input: Any, agent_config
     announced_skills: set[str] = set()
     last_message = None
     current_skill: str | None = None
-    current_tool: str | None = None
+    tool_calls: list[tuple[str, str]] = []
 
     spinner = Spinner("dots", text=Text("Agent thinking...", style="bold cyan"))
+
+    def _format_tool_args(tool_input: Any) -> str:
+        """Render tool arguments as a compact, single-line preview."""
+        if not tool_input:
+            return ""
+
+        def _fmt_value(v: Any) -> str:
+            if isinstance(v, str):
+                s = v.replace("\n", " ").strip()
+                if len(s) > 60:
+                    s = s[:57] + "..."
+                return repr(s)
+            if isinstance(v, (int, float, bool)) or v is None:
+                return repr(v)
+            if isinstance(v, (list, tuple)):
+                return f"[{len(v)} items]"
+            if isinstance(v, dict):
+                return f"{{{len(v)} keys}}"
+            return type(v).__name__
+
+        if isinstance(tool_input, dict):
+            parts = [f"{k}={_fmt_value(v)}" for k, v in tool_input.items()]
+            rendered = ", ".join(parts)
+        else:
+            rendered = _fmt_value(tool_input)
+
+        if len(rendered) > 100:
+            rendered = rendered[:97] + "..."
+        return rendered
 
     def render() -> Group:
         """Render the spinner plus the current activity tree."""
@@ -216,12 +245,21 @@ async def _invoke_with_skill_notifications(agent, agent_input: Any, agent_config
                 ("skill: ", "dim"),
                 (current_skill, "bold magenta"),
             ))
-        if current_tool:
-            lines.append(Text.assemble(
-                ("   └─ ", "dim"),
+        for i, (name, args) in enumerate(tool_calls):
+            is_last = i == len(tool_calls) - 1
+            connector = "   └─ " if is_last else "   ├─ "
+            segments: list[Any] = [
+                (connector, "dim"),
                 ("tool:  ", "dim"),
-                (current_tool, "bold yellow"),
-            ))
+                (name, "bold yellow"),
+            ]
+            if args:
+                segments.extend([
+                    ("(", "bright_black"),
+                    (args, "bright_black"),
+                    (")", "bright_black"),
+                ])
+            lines.append(Text.assemble(*segments))
         return Group(*lines)
 
     stream = await agent.astream_events(agent_input, config=agent_config, version="v3")
@@ -256,8 +294,8 @@ async def _invoke_with_skill_notifications(agent, agent_input: Any, agent_config
                 live.update(render())
                 continue
 
-            # Update the transient "current tool" line.
-            current_tool = tool_name
+            # Append the tool to the running list so repeated calls remain visible.
+            tool_calls.append((tool_name, _format_tool_args(tool_input)))
             live.update(render())
 
         async for message in stream.messages:
