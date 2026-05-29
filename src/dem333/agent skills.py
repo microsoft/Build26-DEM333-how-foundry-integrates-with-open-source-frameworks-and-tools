@@ -1,7 +1,18 @@
+"""Teaching step that adds local skills on top of `agent mcp.py`.
+
+This version keeps the MCP mail-tool integration and extends it with a virtual
+filesystem backend that exposes prompt skills from `dem333/skills`. The agent
+is now built with both remote MCP tools and local reusable skills.
+
+Compared with `agent mcp.py`, the new material here is the `SKILL_SOURCES`
+configuration plus the composite backend that routes `/skills/` lookups into
+the repository. Compared with the final `agent.py`, this file still does not
+add the Playwright browser tool to the available tool list.
+"""
+
 from typing import Any
 from dem333.prompt import SYSTEM_PROMPT
 from dem333.tools.work_iq import build_work_iq_mail_connection
-from dem333.tools.browser import playwright_cli
 from deepagents import create_deep_agent
 from deepagents.backends import CompositeBackend, FilesystemBackend, StateBackend
 
@@ -26,7 +37,7 @@ async def get_tools() -> list[BaseTool]:
     mcp_client = get_mcp_client()
     mcp_tools = await mcp_client.get_tools()
 
-    return mcp_tools + [playwright_cli]
+    return mcp_tools
 
 def get_mcp_client() -> MultiServerMCPClient:
     """Create a configured MCP client for the Office 365 Mail tools server."""

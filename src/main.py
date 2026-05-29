@@ -171,6 +171,7 @@ def _render_assistant_message(message: str) -> None:
 
 
 async def main() -> None:
+    console.clear()
     agent = await build_agent()
 
     # Diagnostic: discover which skills the agent loaded (same loader as SkillsMiddleware).
