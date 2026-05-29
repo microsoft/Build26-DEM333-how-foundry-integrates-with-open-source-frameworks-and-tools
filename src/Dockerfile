@@ -13,7 +13,11 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl git nodejs npm \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g @playwright/cli@latest
+# Install Playwright CLI (https://github.com/microsoft/playwright-cli) and its
+# Chromium browser with required OS dependencies, then install the bundled skills.
+RUN npm install -g @playwright/cli@latest \
+    && npx --yes playwright install --with-deps chromium \
+    && playwright-cli install --skills
 
 COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --locked --no-dev
