@@ -126,7 +126,7 @@ async def invoke_foundry_a2a(message: str) -> str:
     return _safe_join(responses)
 
 
-mcp = FastMCP("dem333-a2a")
+mcp = FastMCP("copilot-a2a-bridge")
 
 
 @mcp.tool()

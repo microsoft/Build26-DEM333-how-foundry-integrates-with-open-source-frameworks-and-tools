@@ -200,24 +200,24 @@ curl -fsS \
   "${FOUNDRY_A2A_URL}/${FOUNDRY_A2A_AGENT_CARD_PATH}" >/dev/null
 ```
 
-The local bridge in `dem333/a2a_mcp_server.py` lets Copilot CLI call the hosted A2A endpoint as an MCP tool. It uses Azure CLI to get a Foundry access token unless `FOUNDRY_A2A_TOKEN` is already set.
+The local Copilot A2A bridge in `dem333/copilot_a2a_bridge.py` lets Copilot CLI call the hosted A2A endpoint through a normal Copilot MCP tool. It uses Azure CLI to get a Foundry access token unless `FOUNDRY_A2A_TOKEN` is already set.
 
 Direct smoke test:
 
 ```bash
 cd src
-uv run python -m dem333.a2a_mcp_server --message "Reply exactly DIRECT_A2A_OK."
+uv run python -m dem333.copilot_a2a_bridge --message "Reply exactly DIRECT_A2A_OK."
 ```
 
 Run Copilot CLI with the bridge:
 
 ```bash
-cat > /tmp/dem333-a2a-mcp.json <<JSON
+cat > /tmp/copilot-a2a-bridge.json <<JSON
 {
   "mcpServers": {
-    "dem333-a2a": {
+    "copilot-a2a-bridge": {
       "command": "uv",
-      "args": ["--directory", "$PWD", "run", "python", "-m", "dem333.a2a_mcp_server"],
+      "args": ["--directory", "$PWD", "run", "python", "-m", "dem333.copilot_a2a_bridge"],
       "env": {
         "FOUNDRY_A2A_URL": "$FOUNDRY_A2A_URL",
         "FOUNDRY_A2A_AGENT_CARD_PATH": "agentCard/v0.3"
@@ -227,7 +227,7 @@ cat > /tmp/dem333-a2a-mcp.json <<JSON
 }
 JSON
 
-copilot --additional-mcp-config @/tmp/dem333-a2a-mcp.json --allow-all-tools --allow-all-urls
+copilot --additional-mcp-config @/tmp/copilot-a2a-bridge.json --allow-all-tools --allow-all-urls
 ```
 
 Then ask Copilot CLI:

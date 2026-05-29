@@ -20,7 +20,7 @@ If you're following this demo at your own pace:
 - Configure environment variables in `.env` file.
 - Run the local agent with `cd src && uv run python main.py --agent demo`
 - Deploy the same agent as a Foundry hosted agent with [docs/HOSTED_AGENT_DEPLOYMENT.md](docs/HOSTED_AGENT_DEPLOYMENT.md)
-- Invoke the hosted agent from Copilot CLI through the A2A MCP bridge in [docs/HOSTED_AGENT_DEPLOYMENT.md](docs/HOSTED_AGENT_DEPLOYMENT.md#5-enable-a2a-and-use-the-copilot-cli-bridge)
+- Invoke the hosted agent from Copilot CLI through the Copilot A2A bridge in [docs/HOSTED_AGENT_DEPLOYMENT.md](docs/HOSTED_AGENT_DEPLOYMENT.md#5-enable-a2a-and-use-the-copilot-cli-bridge)
 - Review the walkthrough in [docs/SCRIPT.md](docs/SCRIPT.md)
 
 ### 🧠 Learning Outcomes

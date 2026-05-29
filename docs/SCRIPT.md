@@ -242,25 +242,25 @@ I can see the duration and also check where my agent is spending all the time an
 
 **N:** Yes — once we enable the Foundry **A2A (Agent-to-Agent) endpoint**, any A2A-compatible client can discover and call this hosted agent. Copilot CLI can already use MCP tools, so for the demo I expose the Foundry A2A endpoint as a tiny local MCP bridge. Let's prove the chain end to end.
 
-*(stage) **N** opens a second terminal and shows the A2A bridge command from `src/dem333/a2a_mcp_server.py`:*
+*(stage) **N** opens a second terminal and shows the Copilot A2A bridge command from `src/dem333/copilot_a2a_bridge.py`:*
 
 ```bash
 cd src
 export FOUNDRY_A2A_URL="${AZURE_AI_PROJECT_ENDPOINT}/agents/${HOSTED_AGENT_NAME}/endpoint/protocols/a2a"
 export FOUNDRY_A2A_AGENT_CARD_PATH="agentCard/v0.3"
 
-uv run python -m dem333.a2a_mcp_server --message "Reply exactly A2A bridge ready."
+uv run python -m dem333.copilot_a2a_bridge --message "Reply exactly A2A bridge ready."
 ```
 
 *(stage) Then **N** starts Copilot CLI with that bridge as an MCP server:*
 
 ```bash
-cat > /tmp/dem333-a2a-mcp.json <<JSON
+cat > /tmp/copilot-a2a-bridge.json <<JSON
 {
   "mcpServers": {
-    "dem333-a2a": {
+    "copilot-a2a-bridge": {
       "command": "uv",
-      "args": ["--directory", "$PWD", "run", "python", "-m", "dem333.a2a_mcp_server"],
+      "args": ["--directory", "$PWD", "run", "python", "-m", "dem333.copilot_a2a_bridge"],
       "env": {
         "FOUNDRY_A2A_URL": "$FOUNDRY_A2A_URL",
         "FOUNDRY_A2A_AGENT_CARD_PATH": "agentCard/v0.3"
@@ -270,7 +270,7 @@ cat > /tmp/dem333-a2a-mcp.json <<JSON
 }
 JSON
 
-copilot --additional-mcp-config @/tmp/dem333-a2a-mcp.json --allow-all-tools --allow-all-urls
+copilot --additional-mcp-config @/tmp/copilot-a2a-bridge.json --allow-all-tools --allow-all-urls
 ```
 
 *(stage) Inside Copilot CLI:*
@@ -316,5 +316,5 @@ Thanks Nagkumar for this fantastic demo, thanks everyone. We'll stick around for
 - [ ] At least 5 recent emails in the demo mailbox (seed if needed)
 - [ ] `@playwright/cli` installed; browser session `dem333` opens without prompting
 - [ ] Hosted deployment command from `docs/HOSTED_AGENT_DEPLOYMENT.md` already executed once; redeploy fast path documented
-- [ ] Copilot CLI installed, logged in, and `/tmp/dem333-a2a-mcp.json` points at the hosted A2A bridge
+- [ ] Copilot CLI installed, logged in, and `/tmp/copilot-a2a-bridge.json` points at the hosted A2A bridge
 - [ ] Terminal font ≥ 16pt, dark theme, line wrap on
