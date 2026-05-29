@@ -33,7 +33,7 @@
 
 ## 3. A minimal agent loop in LangGraph — ⏱ 3 min
 
-**F:** Nagu, let's start at the bottom. If I want to build an agent today — no Foundry, no magic — what's the smallest amount of code I need?
+**F:** Nagku, let's start at the bottom. If I want to build an agent today — no Foundry, no magic — what's the smallest amount of code I need?
 
 *(stage) **N** opens [src/dem333/agent.py](src/dem333/agent.py) in VS Code.*
 
@@ -149,7 +149,7 @@ backend = CompositeBackend(
 
 ## 7. Sophisticated tools — Playwright browser — ⏱ 4 min
 
-**F:** OK — inbox is covered. The other thing OpenClaw is famous for is **browsing the web**. Nagu, what's our open-source story there?
+**F:** OK — inbox is covered. The other thing OpenClaw is famous for is **browsing the web**. Nagku, what's our open-source story there?
 
 *(stage) **N** opens [src/dem333/tools/browser.py](src/dem333/tools/browser.py) briefly, then [src/dem333/skills/web-browsing/SKILL.md](src/dem333/skills/web-browsing/SKILL.md).*
 
@@ -169,7 +169,7 @@ backend = CompositeBackend(
 
 ## 8. From console to cloud — Responses API on Foundry — ⏱ 3 min
 
-**F:** OK Nagu, fair question from the audience: this is all running in a terminal on your laptop. What happens when I want to ship it? I don't want my customers SSH-ing into your machine.
+**F:** OK Nagku, fair question from the audience: this is all running in a terminal on your laptop. What happens when I want to ship it? I don't want my customers SSH-ing into your machine.
 
 **N:** This is the part where Foundry pays for itself. Foundry hosts agents behind the **OpenAI Responses API** — same protocol millions of developers already know. We don't rewrite the agent — we wrap it.
 
