@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import secrets
 import warnings
@@ -9,9 +10,13 @@ from langchain_azure_ai._api.base import ExperimentalWarning
 warnings.filterwarnings("ignore", category=LangChainBetaWarning)
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
-from dem333.agent import build_agent, get_mcp_client, get_tools, backend, SKILL_SOURCES
+from dem333.agent import build_agent, SKILL_SOURCES
+from dem333.agent_base import build_agent as build_agent_base
+from dem333.agent_mcp import build_agent as build_agent_mcp
+from dem333.agent_skills import build_agent as build_agent_skills
 from dem333.utils import inspect_loaded_skills
 from langchain_core.messages import AIMessage, HumanMessage
+from langgraph.graph.state import CompiledStateGraph
 from rich.console import Console, Group
 from rich.live import Live
 from rich.markdown import Markdown
@@ -20,7 +25,7 @@ from rich.prompt import Prompt
 from rich.rule import Rule
 from rich.spinner import Spinner
 from rich.text import Text
-from typing import Any
+from typing import Any, Awaitable, Callable
 
 
 EXIT_COMMANDS = {"exit", "quit", ":q"}
@@ -170,15 +175,14 @@ def _render_assistant_message(message: str) -> None:
     )
 
 
-async def main() -> None:
+async def main(agent_builder: Callable[[], Awaitable[CompiledStateGraph]]) -> None:
     console.clear()
-    agent = await build_agent()
+    
+    agent = await agent_builder()
 
     # Diagnostic: discover which skills the agent loaded (same loader as SkillsMiddleware).
-    skill_names, errors = await inspect_loaded_skills(SKILL_SOURCES, backend)
+    skill_names, errors = await inspect_loaded_skills(agent)
 
-    if not skill_names:
-        console.print("[bold yellow]Warning:[/bold yellow] no skills were loaded.")
     for err in errors:
         console.print(f"[bold red]Skill load error:[/bold red] {err}")
 
@@ -334,4 +338,21 @@ async def _run_chat_loop(agent, skill_names: list[str] | None = None) -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(description="DEM333 Build Agent Console")
+    parser.add_argument(
+        "--agent",
+        choices=["demo","mcp", "base", "skills"],
+        default="demo",
+        help="Agent type to load (default: skills)",
+    )
+    args = parser.parse_args()
+    
+    # Map agent type to builder function
+    agent_builders = {
+        "mcp": build_agent_mcp,
+        "base": build_agent_base,
+        "skills": build_agent_skills,
+    }
+    
+    selected_builder = agent_builders.get(args.agent, build_agent)
+    asyncio.run(main(agent_builder=selected_builder))

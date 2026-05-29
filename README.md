@@ -54,6 +54,7 @@ Help me add a new skill that summarizes inbox triage results into a daily digest
 
 ### 💻 Technologies Used
 
+1. [LangChain for Azure](https://aka.ms/azureai/langchain)
 1. [Microsoft Foundry Models](https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview)
 1. [Azure OpenAI in Microsoft Foundry Models v1 API](https://learn.microsoft.com/azure/foundry/openai/api-version-lifecycle)
 1. [Model Context Protocol tooling in Microsoft Foundry Agents](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/model-context-protocol)

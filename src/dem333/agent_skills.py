@@ -11,7 +11,7 @@ add the Playwright browser tool to the available tool list.
 """
 
 from typing import Any
-from dem333.prompt import SYSTEM_PROMPT
+from dem333.prompts.base import SYSTEM_PROMPT
 from dem333.tools.work_iq import build_work_iq_mail_connection
 from deepagents import create_deep_agent
 from deepagents.backends import CompositeBackend, FilesystemBackend, StateBackend
@@ -20,17 +20,10 @@ from langchain.tools import BaseTool
 from langchain.chat_models import init_chat_model
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph.state import CompiledStateGraph
 
 SKILL_SOURCES = ["/skills/"]
 
-checkpointer = MemorySaver()
-
-backend = CompositeBackend(
-    default=StateBackend(),
-    routes={
-        "/skills/": FilesystemBackend(root_dir="dem333/skills", virtual_mode=True),
-    },
-)
 
 async def get_tools() -> list[BaseTool]:
     """Get the list of available tools."""
@@ -39,16 +32,26 @@ async def get_tools() -> list[BaseTool]:
 
     return mcp_tools
 
+
 def get_mcp_client() -> MultiServerMCPClient:
     """Create a configured MCP client for the Office 365 Mail tools server."""
     connections: dict[str, Any] = {"mail": build_work_iq_mail_connection()}
     return MultiServerMCPClient(connections)
 
 
-async def build_agent():
+async def build_agent() -> CompiledStateGraph:
     """Build a deep learning agent with the provided MCP tools."""
     model = init_chat_model("openai:gpt-5.2")
     tools = await get_tools()
+    checkpointer = MemorySaver()
+
+    backend = CompositeBackend(
+        default=StateBackend(),
+        routes={
+            "/skills/": FilesystemBackend(root_dir="dem333/skills", virtual_mode=True),
+        },
+    )
+    
     return create_deep_agent(
         model=model,
         tools=tools,
