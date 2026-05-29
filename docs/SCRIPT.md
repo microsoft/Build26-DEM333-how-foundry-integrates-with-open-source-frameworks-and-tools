@@ -27,7 +27,7 @@
 
 *(stage) Switch to a single slide: "Goal: build our own OpenClaw using only open-source pieces, then graduate it to Foundry."*
 
-**F:** Here's the framing. You've all seen *OpenClaw* — a general-purpose agent that can browse the web, read your email, remember you, and run somewhere in the cloud you can call from anywhere. Today, we are going to **build our own OpenClaw, live**, using open-source frameworks and tools — and then we are going to show how **Microsoft Foundry takes that exact same code and supercharges it**.
+**F:** And for that... we broght to you an interesting setup. You've all seen *OpenClaw*, right? — a general-purpose agent that can browse the web, read your email, remember you, and stalk your significant other online. Today, we are going to **build our own OpenClaw, live**, using open-source frameworks and tools — and then we are going to show how **Microsoft Foundry takes that exact same code and supercharges it**. Sounds fun? Let's get started.
 
 ---
 
@@ -37,7 +37,7 @@
 
 *(stage) **N** opens [src/dem333/agent.py](src/dem333/agent.py) in VS Code.*
 
-**N:** To create a minimal agent you need 2 things: a model and a continuous loop. So let's see an example using LangChain. For the model, we use `init_chat_model` to grab any model — here it's pointing to a GPT model. For the loop, `create_agent` method from langchain gives us a basic agent loop that will wait for my inputs and generate an output.
+**N:** To create a minimal agent you need 2 things: a model and a continuous loop. So let's see an example using LangChain. We are on VSCode and I created this function that builds my agent. For the model, we use `init_chat_model` to grab any model — here it's pointing to a GPT model. For the loop, `create_agent` method from langchain gives us a basic agent loop that will wait for my inputs and generate an output.
 
 *(stage) Highlight these lines:*
 
@@ -52,7 +52,7 @@ return create_deep_agent(
 
 **F:** And from where that model is coming from?
 
-**N:** The `init_chat_model` method automatically reads my environment variables and find the model from a Microsoft Foundry project I have setup. Most Foundry Models implement OpenAI Responses API so I can easily switch to another model if I need to, for example, a DeepSeek model. 
+**N:** The `init_chat_model` method automatically reads my environment variables and find the model from a Microsoft Foundry project I have setup. Most Foundry Models implement OpenAI Responses API so you can change it if needed to, for example, a DeepSeek model. 
 
 **F:** And what runs that loop?
 
@@ -62,7 +62,7 @@ return create_deep_agent(
 
 *(stage) **N** opens the integrated terminal. Venv already active.*
 
-**N:** I built a console terminal to execute the loop. Let's just run it.
+**N:** I built a console terminal to execute the loop so we can see things more interactively. Let's just run it.
 
 ```bash
 python src/main.py
@@ -70,19 +70,23 @@ python src/main.py
 
 *(stage) The DEM333 banner shows up. **N** types:*
 
-> `Hello!`
+> ` Hello! What are you working on today—want help with something specific (writing, coding, planning, troubleshooting), or just exploring an idea?  `
 
 *(stage) Agent replies with a generic "I'm a helpful assistant…" message.*
 
-**F:** Cool — so we have a working loop. Now, one of the reasons OpenClaw is so popular is because it can do things for you, can it?
+**F:** Cool — so we have a working loop. Now, one of the reasons OpenClaw is so popular is because it can do things for you, what can this one do for us?
 
-**N:** No much. If I ask it to read my email, it'll just apologize. Let's give it a hand.
+**N:** No much. If I ask it to read my email, it'll just apologize. 
+
+*(stage) Type "Check my inbox" and it will reply "I can’t directly access your email inbox from here."*
 
 ---
 
 ## 5. Tools via MCP — connecting Work IQ — ⏱ 4 min
 
-**N:** The open-source pattern for that connecting the agent to an **MCP Server — Model Context Protocol**. In one sentence: MCP is an open standard that lets an agent discover and call tools to perform actions. 
+**N:** Let's give it a hand.
+
+The open-source pattern for that connecting the agent to an **MCP Server — Model Context Protocol**. In one sentence: MCP is an open standard that lets an agent discover and call tools to perform actions. 
 
 And one of the most powerful MCP servers out there today is **Work IQ** — a first-party server from Microsoft that gives an agent access to **everything in Microsoft 365**: email, calendar, contacts, files, Teams messages, the lot. So let's give this agent access to my email.
 
@@ -104,29 +108,29 @@ def get_mcp_client() -> MultiServerMCPClient:
 
 *(stage) **N** restarts `python src/main.py` (mail tools now loaded). Prompt:*
 
-> `What's the latest in my mailbox?`
+> `Check my inbox`
 
 *(stage) The Rich spinner shows the agent calling `mcp_MailTools_graph_mail_searchMessages`. Output is a clean list of 5 messages.*
 
-**F:** Beautiful. So the agent now has hands — but it doesn't yet know *how* to use them well. For example, if I want to triage my inbox, that format is not that useful.
+**F:** Beautiful. So the agent now has hands — but we want more than that. For example, if I want to triage my inbox, do I need to ask it to open each message, read the content, etc?
 
 ---
 
 ## 6. Skills — teaching the agent *how* to use tools — ⏱ 4 min
 
-**N:** Exactly, and that's where **Skills** come into play. A tool is a *verb* — "search messages." A skill is a *playbook* — "here's how you triage an inbox: pull minimal fields first, classify into five categories, score P0–P3, draft replies using these templates, and never fabricate facts." It's a markdown file the agent reads **only when it's relevant**.
+**N:** That's where **Skills** come into play. Tools are like a *verb* — "search messages." But an skill is a *playbook* — "here's how you triage an inbox: pull minimal fields first, classify into five categories, score P0–P3, draft replies using these templates, and never fabricate facts." It's a markdown file the agent reads **only when it's relevant**.
 
 *(stage) **N** opens [src/dem333/skills/inbox-triage/SKILL.md](src/dem333/skills/inbox-triage/SKILL.md).*
 
 Skills is an **open format created by Anthropic** — you just write a skill as a **markdown file** with a small frontmatter block. No SDK, no special runtime, no proprietary schema. Any agent that knows the format can load it.
 
-Let's try to run the agent now with skills:
+I have an agent with this skill running, let's take a look now:
 
 *(stage) Back to the running agent. Prompt:*
 
 > `Triage my inbox.`
 
-*(stage) Watch the spinner: skill loads (`skill: Inbox Triage`), then tool calls fire. The agent prints "WELCOME TO THE TRIAGE SKILL" (the canary from Step 0), pulls minimal fields, classifies, prioritizes, and produces the Priority Queue / Category Summary / Drafts Ready output.*
+*(stage) Watch the spinner: skill loads (`skill: Inbox Triage`), then tool calls fire. The agent, pulls minimal fields, classifies, prioritizes, and produces the Priority Queue / Category Summary / Drafts Ready output.*
 
 **F:** While this runs, how is the agent finding these skills we wrote?
 
@@ -141,9 +145,9 @@ backend = CompositeBackend(
 )
 ```
 
-**N:** Now, we see the agent came back with the triage of the inbox.
+**N:** Now, we see the agent came back with the triage of the inbox and it even drafted reply messages for us to send.
 
-**F:** Interesting, because we are using the same model, same tools — totally different behavior, because we taught it the *procedure*.
+**F:** That's bold. Same model, same tools — but totally different behavior.
 
 ---
 
@@ -153,7 +157,7 @@ backend = CompositeBackend(
 
 *(stage) **N** opens [src/dem333/skills/web-browsing/SKILL.md](src/dem333/skills/web-browsing/SKILL.md).*
 
-**N:** Playwright is an open-source framework that allows developers and testers to control browsers using a single API and write scripts to test functionality. In our case, I have Playwright installed in this computer so we can create an skill that tells the agent how to use the tool to navigate the web.
+**N:** For that, we can use Playwright, an open-source framework that allows developers and testers to control browsers using a single API and write scripts to test functionality. In our case, I have Playwright installed in this computer and I created an skill that tells the agent how to use the tool to navigate the web.
 
 **F:** Can we see it in action? Ask it for example to find the price of something on amazon.
 
@@ -165,7 +169,7 @@ backend = CompositeBackend(
 
 **N:** Ok, let's see what it does now...
 
-**F:** While this runs, I'm wondering - is there an MCP Server we can use with playwright or why did we used a different approach?
+**F:** While this runs, I'm wondering - why did we use a different approach here compared to the MCP server from Work IQ?
 
 **N:** We could use an MCP server. However, a more popular approch these days is to use the command line. Microsoft just shipped **`@playwright/cli`** — a command-line wrapper around Playwright designed for agents. Instead of giving the model 40 fine-grained MCP tools (one per browser action), we give it **one tool**: `playwright_cli`, and a **skill** that teaches it the command vocabulary. Same pattern as before — the verbs live in markdown, not in the tool schema. That saves a huge amount of context.
 
@@ -181,9 +185,9 @@ backend = CompositeBackend(
 
 *(stage) **N** opens a small `server.py` that takes the same `build_agent(...)` function and exposes it as a Responses-compatible endpoint, then runs:*
 
-**N:** Now anything that speaks the Responses API — the OpenAI SDK, curl, a Next.js app — can call our LangGraph agent. I can run it locally, or I can deploy it to the Foundry using azd
+**N:** I can run it locally, or I can deploy it to the Foundry using azd
 
-*(stage) Show terminal to deploy it
+*(stage) Show terminal to deploy it*
 
 ```bash
 azd ....
@@ -193,7 +197,7 @@ I have this agent already deployed so let's take a look to the playground.
 
 *(stage) Response streams back.*
 
-**F:** So our agent stayed LangGraph but we just wrapped and serve it on the Responses API.
+**F:** Fantastic, because anything that speaks the Responses API — the OpenAI SDK, curl, a Next.js app — can call our LangGraph agent without changing it.
 
 ---
 
@@ -203,7 +207,7 @@ I have this agent already deployed so let's take a look to the playground.
 
 **N:** I'm glad you ask because Foundry implements OpenTelemetry using Semantic Conventions for GenAI, which is the same stack used across multiple agentic stacks including GitHub Copipot.
 
-Let's take a look and see one of those traces.
+It I switch to the Monitoring tab I have access to the traces from this agent.
 
 *(stage) show the traces.
 
@@ -211,7 +215,7 @@ I can see the duration and also check where my agent is spending all the time an
 
 ## 10. A2A — calling our agent from Copilot CLI — ⏱ 2.5 min
 
-**F:** Ok, last question. Because I heard that 2026 is all about agents calling other agents... can other agents talk with this agent? Is that a thing?
+**F:** Ok, last question. Because I heard that 2026 is all about agents calling other agents... can other agents talk with this one? Is that a thing?
 
 **N:** Yes — Foundry exposes every hosted agent over the **A2A (Agent-to-Agent) protocol** automatically that allow agents to call other agents to create tasks. No extra config. That means any A2A-compatible client can discover and call it. Let's prove it with **GitHub Copilot CLI**.
 
@@ -227,17 +231,17 @@ copilot agent add --a2a $FOUNDRY_A2A_URL
 
 *(stage) Copilot CLI routes the request over A2A to our Foundry-hosted agent, which loads the inbox-triage skill, calls Work IQ Mail, and responds. Output appears inside Copilot CLI.*
 
-**F:** Stop and look at what just happened. **Copilot CLI** — a totally different agent runtime — called *our* LangGraph agent hosted in Foundry, which then used an MCP tool to read my mailbox, applied a skill, and answered. **None of those pieces had to know about each other.** That's the open-source story end-to-end we wanted to tell.
+**F:** Neat! Let's look at what just happened. **Copilot CLI** — a totally different agent runtime — called *our* LangGraph agent hosted in Foundry, which then used an MCP tool to read my mailbox, applied a skill, and answered. **None of those pieces had to know about each other.** That's the open-source story, end-to-end,  we wanted to tell.
 
 ---
 
 ## Wrap-up — ⏱ 1 min
 
-**F:** And that's the story we want all of you to take away from this session. 
+**F:** And that's the story we want YOU to take away from this session. 
 
 This code is available so clone it and you can run every step of what we just did.
 
-**N:** Thanks everyone. We'll stick around for questions.
+Thanks Nagkumar for this fantastic demo, thanks everyone. We'll stick around for questions.
 
 *(stage) End slide with QR code → repo URL.*
 
