@@ -3,7 +3,7 @@
 **Session:** How Foundry Integrates With Open Source Frameworks and Tools
 **Speakers:** **Facundo** (narrator / asks the questions) · **Nagkumar** (drives VS Code, shares screen)
 **Duration target:** 30 minutes
-**Demo project:** `src/` — a "homegrown OpenClaw" built with LangGraph + deepagents + Foundry
+**Demo project:** `src/` — a "homegrown OpenClaw" built with LangGraph + Foundry
 
 > **Conventions used below**
 > - **F:** = Facundo speaking
