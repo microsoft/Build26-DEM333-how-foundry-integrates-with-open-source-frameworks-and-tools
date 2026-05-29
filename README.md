@@ -19,6 +19,7 @@ If you're following this demo at your own pace:
 - Follow the setup instructions in [docs/PREREQ.md](docs/PREREQ.md)
 - Configure environment variables in `.env` file.
 - Run the local agent with `cd src && uv run main.py`
+- Deploy the same agent as a Foundry hosted agent with [docs/HOSTED_AGENT_DEPLOYMENT.md](docs/HOSTED_AGENT_DEPLOYMENT.md)
 - Review the walkthrough in [docs/SCRIPT.md](docs/SCRIPT.md)
 
 ### 🧠 Learning Outcomes
@@ -90,6 +91,11 @@ For more info, other clients, and to post questions, visit the [Learn MCP Server
         <img src="https://avatars.githubusercontent.com/u/32112894?v=4" width="100px;" alt="Facundo Santiago"/><br />
         <sub><b>Facundo Santiago</b></sub></a><br />
             <a href="https://github.com/santiagxf" title="talk">📢</a>
+    </td>
+    <td align="center"><a href="https://github.com/nagkumar91">
+        <img src="https://github.com/nagkumar91.png?size=100" width="100px;" alt="nagkumar91"/><br />
+        <sub><b>nagkumar91</b></sub></a><br />
+            <a href="https://github.com/nagkumar91" title="code">💻</a>
     </td>
 </tr></table>
 
