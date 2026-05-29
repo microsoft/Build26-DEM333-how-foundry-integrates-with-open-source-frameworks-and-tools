@@ -1,6 +1,6 @@
 from typing import Any
 
-from dem333.prompts.base import SYSTEM_PROMPT
+from dem333.prompts.prompt import SYSTEM_PROMPT
 from dem333.tools.work_iq import build_work_iq_mail_connection
 from dem333.tools.browser import playwright_cli
 from deepagents import create_deep_agent

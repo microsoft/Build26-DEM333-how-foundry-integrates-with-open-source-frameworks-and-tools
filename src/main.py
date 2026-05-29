@@ -107,7 +107,7 @@ def _render_build_banner() -> Text:
 def _render_header(skill_names: list[str] | None = None) -> None:
     banner = _render_build_banner()
     title = Text("DEM333 // Build Agent Console", style="bold white on blue")
-    subtitle = Text("Open-source frameworks x Azure AI Foundry", style="bold cyan")
+    subtitle = Text("Open-source frameworks x Microsoft Foundry", style="bold cyan")
     body = Text.assemble(
         ("Enter prompt", "bold white"),
         ("  |  ", "dim"),

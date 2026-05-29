@@ -11,7 +11,7 @@ add the Playwright browser tool to the available tool list.
 """
 
 from typing import Any
-from dem333.prompts.base import SYSTEM_PROMPT
+from dem333.prompts.skills import SYSTEM_PROMPT
 from dem333.tools.work_iq import build_work_iq_mail_connection
 from deepagents import create_deep_agent
 from deepagents.backends import CompositeBackend, FilesystemBackend, StateBackend

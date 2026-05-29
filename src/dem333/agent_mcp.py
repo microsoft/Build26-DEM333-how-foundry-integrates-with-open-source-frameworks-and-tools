@@ -12,7 +12,7 @@ configure a composite backend for skill resolution.
 """
 
 from typing import Any
-from dem333.prompts.base import SYSTEM_PROMPT
+from dem333.prompts.mcp import SYSTEM_PROMPT
 from dem333.tools.work_iq import build_work_iq_mail_connection
 from deepagents import create_deep_agent
 
