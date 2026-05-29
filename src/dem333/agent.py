@@ -1,4 +1,5 @@
 from typing import Any
+
 from dem333.prompt import SYSTEM_PROMPT
 from dem333.tools.work_iq import build_work_iq_mail_connection
 from dem333.tools.browser import playwright_cli
@@ -21,12 +22,14 @@ backend = CompositeBackend(
     },
 )
 
+
 async def get_tools() -> list[BaseTool]:
     """Get the list of available tools."""
     mcp_client = get_mcp_client()
     mcp_tools = await mcp_client.get_tools()
 
     return mcp_tools + [playwright_cli]
+
 
 def get_mcp_client() -> MultiServerMCPClient:
     """Create a configured MCP client for the Office 365 Mail tools server."""
@@ -46,4 +49,3 @@ async def build_agent():
         checkpointer=checkpointer,
         backend=backend,
     )
-
