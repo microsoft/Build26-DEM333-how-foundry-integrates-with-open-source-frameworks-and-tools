@@ -42,3 +42,21 @@ def build_work_iq_mail_connection() -> dict[str, Any]:
         scope=WORK_IQ_MAIL_SCOPE,
     )
     return build_work_iq_mail_server_config(access_token=token)
+
+
+def _format_work_iq_tool_error(error: Exception) -> str:
+    first_line = str(error).splitlines()[0] if str(error) else type(error).__name__
+    return (
+        "The mail tool rejected that request. Retry once with a smaller page and valid "
+        "tool arguments. For SearchMessagesQueryParameters, queryParameters must start "
+        "with '?' and include each OData parameter separately, for example "
+        "'?$select=id,subject,from,receivedDateTime&$top=5'. "
+        f"Tool error: {first_line}"
+    )
+
+
+def configure_work_iq_tool_error_handling(tools: list[Any]) -> list[Any]:
+    """Return MCP tools configured to surface recoverable tool errors to the agent."""
+    for tool in tools:
+        tool.handle_tool_error = _format_work_iq_tool_error
+    return tools

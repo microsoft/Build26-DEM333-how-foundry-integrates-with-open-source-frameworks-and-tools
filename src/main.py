@@ -10,12 +10,8 @@ from langchain_azure_ai._api.base import ExperimentalWarning
 warnings.filterwarnings("ignore", category=LangChainBetaWarning)
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
-from dem333.agent import build_agent, SKILL_SOURCES
-from dem333.agent_base import build_agent as build_agent_base
-from dem333.agent_mcp import build_agent as build_agent_mcp
-from dem333.agent_skills import build_agent as build_agent_skills
 from dem333.utils import inspect_loaded_skills
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 from rich.console import Console, Group
 from rich.live import Live
@@ -375,22 +371,28 @@ async def _run_chat_loop(agent, skill_names: list[str] | None = None) -> None:
             console.print(f"[bold red]Agent call failed:[/bold red] {exc}")
 
 
+def _resolve_agent_builder(agent_name: str) -> Callable[[], Awaitable[CompiledStateGraph]]:
+    """Import only the selected teaching step so earlier steps stay dependency-light."""
+    if agent_name == "base":
+        from dem333.agent_base import build_agent
+    elif agent_name == "mcp":
+        from dem333.agent_mcp import build_agent
+    elif agent_name == "skills":
+        from dem333.agent_skills import build_agent
+    else:
+        from dem333.agent import build_agent
+
+    return build_agent
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="DEM333 Build Agent Console")
     parser.add_argument(
         "--agent",
-        choices=["demo","mcp", "base", "skills"],
+        choices=["demo", "mcp", "base", "skills"],
         default="demo",
-        help="Agent type to load (default: skills)",
+        help="Agent type to load (default: demo)",
     )
     args = parser.parse_args()
-    
-    # Map agent type to builder function
-    agent_builders = {
-        "mcp": build_agent_mcp,
-        "base": build_agent_base,
-        "skills": build_agent_skills,
-    }
-    
-    selected_builder = agent_builders.get(args.agent, build_agent)
-    asyncio.run(main(agent_builder=selected_builder))
+
+    asyncio.run(main(agent_builder=_resolve_agent_builder(args.agent)))

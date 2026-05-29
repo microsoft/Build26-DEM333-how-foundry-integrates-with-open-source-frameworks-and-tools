@@ -12,7 +12,10 @@ add the Playwright browser tool to the available tool list.
 
 from typing import Any
 from dem333.prompts.skills import SYSTEM_PROMPT
-from dem333.tools.work_iq import build_work_iq_mail_connection
+from dem333.tools.work_iq import (
+    build_work_iq_mail_connection,
+    configure_work_iq_tool_error_handling,
+)
 from deepagents import create_deep_agent
 from deepagents.backends import CompositeBackend, FilesystemBackend, StateBackend
 
@@ -30,7 +33,7 @@ async def get_tools() -> list[BaseTool]:
     mcp_client = get_mcp_client()
     mcp_tools = await mcp_client.get_tools()
 
-    return mcp_tools
+    return configure_work_iq_tool_error_handling(mcp_tools)
 
 
 def get_mcp_client() -> MultiServerMCPClient:
@@ -60,4 +63,3 @@ async def build_agent() -> CompiledStateGraph:
         checkpointer=checkpointer,
         backend=backend,
     )
-

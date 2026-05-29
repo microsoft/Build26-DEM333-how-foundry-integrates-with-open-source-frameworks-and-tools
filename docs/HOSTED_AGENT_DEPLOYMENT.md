@@ -1,6 +1,6 @@
 # Deploy as a Microsoft Foundry hosted agent
 
-This demo can run locally or as a Microsoft Foundry hosted agent. Hosted mode packages the LangGraph/OpenClaw agent into a container, publishes it to Azure Container Registry, and exposes it through the Foundry Responses protocol.
+This demo can run locally or as a Microsoft Foundry hosted agent. Hosted mode packages the LangGraph/OpenClaw agent into a container, publishes it to Azure Container Registry, and exposes it through the Foundry Responses protocol. The same hosted agent can also be exposed through Foundry A2A for the Copilot CLI finale.
 
 The demo assumes Work IQ Mail MCP is already configured and working. The hosted agent intentionally starts with the mail MCP tools enabled; missing or invalid Work IQ settings should fail fast instead of silently disabling mailbox capabilities.
 
@@ -128,4 +128,110 @@ Can you check my latest email and summarize the top 3 messages?
 
 ```text
 Open https://build.microsoft.com/en-US/sessions/DEM333 and summarize the session in 3 bullets.
+```
+
+## 5. Enable A2A and use the Copilot CLI bridge
+
+Enable the A2A endpoint and attach an agent card that describes the demo skills:
+
+```bash
+export FOUNDRY_TOKEN=$(az account get-access-token \
+  --resource https://ai.azure.com \
+  --query accessToken -o tsv)
+
+curl -fsS -X PATCH \
+  -H "Authorization: Bearer ${FOUNDRY_TOKEN}" \
+  -H "Content-Type: application/json" \
+  "${AZURE_AI_PROJECT_ENDPOINT}/agents/${HOSTED_AGENT_NAME}?api-version=v1" \
+  -d @- <<'JSON'
+{
+  "agent_endpoint": {
+    "version_selector": {
+      "version_selection_rules": [
+        {
+          "type": "FixedRatio",
+          "agent_version": "@latest",
+          "traffic_percentage": 100
+        }
+      ]
+    },
+    "protocols": ["responses", "a2a"],
+    "authorization_schemes": [
+      {
+        "type": "Entra",
+        "isolation_key_source": {
+          "kind": "Entra"
+        }
+      }
+    ]
+  },
+  "agent_card": {
+    "version": "1.0.0",
+    "description": "DEM333 OpenClaw-style demo agent that can triage mailbox work with Work IQ Mail MCP, use markdown skills, browse the web with Playwright, and explain the Build session demo flow.",
+    "skills": [
+      {
+        "id": "inbox-triage",
+        "name": "Inbox triage",
+        "description": "Inspects recent mailbox items through Work IQ Mail MCP and returns safe priority summaries without exposing message contents.",
+        "tags": ["mail", "mcp", "skill"],
+        "examples": ["What are the top three things in my inbox right now?"]
+      },
+      {
+        "id": "web-browsing",
+        "name": "Web browsing",
+        "description": "Uses Playwright CLI browser automation to inspect public web pages and summarize findings.",
+        "tags": ["browser", "playwright", "skill"],
+        "examples": ["Open the DEM333 session page and summarize it in three bullets."]
+      }
+    ]
+  }
+}
+JSON
+```
+
+Verify the A2A card endpoint:
+
+```bash
+export FOUNDRY_A2A_URL="${AZURE_AI_PROJECT_ENDPOINT}/agents/${HOSTED_AGENT_NAME}/endpoint/protocols/a2a"
+export FOUNDRY_A2A_AGENT_CARD_PATH="agentCard/v0.3"
+
+curl -fsS \
+  -H "Authorization: Bearer ${FOUNDRY_TOKEN}" \
+  "${FOUNDRY_A2A_URL}/${FOUNDRY_A2A_AGENT_CARD_PATH}" >/dev/null
+```
+
+The local bridge in `dem333/a2a_mcp_server.py` lets Copilot CLI call the hosted A2A endpoint as an MCP tool. It uses Azure CLI to get a Foundry access token unless `FOUNDRY_A2A_TOKEN` is already set.
+
+Direct smoke test:
+
+```bash
+cd src
+uv run python -m dem333.a2a_mcp_server --message "Reply exactly DIRECT_A2A_OK."
+```
+
+Run Copilot CLI with the bridge:
+
+```bash
+cat > /tmp/dem333-a2a-mcp.json <<JSON
+{
+  "mcpServers": {
+    "dem333-a2a": {
+      "command": "uv",
+      "args": ["--directory", "$PWD", "run", "python", "-m", "dem333.a2a_mcp_server"],
+      "env": {
+        "FOUNDRY_A2A_URL": "$FOUNDRY_A2A_URL",
+        "FOUNDRY_A2A_AGENT_CARD_PATH": "agentCard/v0.3"
+      }
+    }
+  }
+}
+JSON
+
+copilot --additional-mcp-config @/tmp/dem333-a2a-mcp.json --allow-all-tools --allow-all-urls
+```
+
+Then ask Copilot CLI:
+
+```text
+Use the ask_dem333_agent tool to ask: what are the top 3 things in my inbox right now?
 ```

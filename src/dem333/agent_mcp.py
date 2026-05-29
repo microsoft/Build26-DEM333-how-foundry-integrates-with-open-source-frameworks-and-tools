@@ -13,7 +13,10 @@ configure a composite backend for skill resolution.
 
 from typing import Any
 from dem333.prompts.mcp import SYSTEM_PROMPT
-from dem333.tools.work_iq import build_work_iq_mail_connection
+from dem333.tools.work_iq import (
+    build_work_iq_mail_connection,
+    configure_work_iq_tool_error_handling,
+)
 from deepagents import create_deep_agent
 
 from langchain.tools import BaseTool
@@ -28,7 +31,7 @@ async def get_tools() -> list[BaseTool]:
     mcp_client = get_mcp_client()
     mcp_tools = await mcp_client.get_tools()
 
-    return mcp_tools
+    return configure_work_iq_tool_error_handling(mcp_tools)
 
 
 def get_mcp_client() -> MultiServerMCPClient:
@@ -49,4 +52,3 @@ async def build_agent() -> CompiledStateGraph:
         system_prompt=SYSTEM_PROMPT,
         checkpointer=checkpointer,
     )
-

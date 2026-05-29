@@ -53,13 +53,13 @@ class PlaywrightCliInput(BaseModel):
 def _resolve_binary() -> list[str]:
     """Return argv prefix for invoking playwright-cli.
 
-    Prefer a globally installed `playwright-cli`; fall back to
-    `npx --no-install playwright-cli` as documented upstream.
+    Prefer a globally installed `playwright-cli`; fall back to `npx` so the
+    local demo works even when the CLI has not been preinstalled.
     """
     if shutil.which("playwright-cli"):
         return ["playwright-cli"]
     if shutil.which("npx"):
-        return ["npx", "--no-install", "playwright-cli"]
+        return ["npx", "--yes", "@playwright/cli@latest"]
     raise RuntimeError(
         "playwright-cli not found. Install with `npm install -g @playwright/cli@latest` "
         "or ensure `npx` is on PATH."

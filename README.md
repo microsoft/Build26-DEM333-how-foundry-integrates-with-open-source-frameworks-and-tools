@@ -10,7 +10,7 @@
 
 ### Session Description
 
-This demo walks through building a practical OpenClaw like agent using open-source technologies and then operationalizing the same solution in Microsoft Foundry. You will see how to connect enterprise tools with the Model Context Protocol, codify repeatable behavior with skills, add browser automation with Playwright CLI, observe with OpenTelemetry, and move from local development to cloud-hosted agents using open protocols like Responses API and A2A to agent-to-agent communication.
+This demo walks through building a practical OpenClaw like agent using open-source technologies and then operationalizing the same solution in Microsoft Foundry. You will see how to connect enterprise tools with the Model Context Protocol, codify repeatable behavior with skills, add browser automation with Playwright CLI, observe with OpenTelemetry, and move from local development to cloud-hosted agents using open protocols like Responses API and A2A agent-to-agent communication.
 
 ### 🚀 Getting started
 
@@ -18,8 +18,9 @@ If you're following this demo at your own pace:
 - Clone this repository
 - Follow the setup instructions in [docs/PREREQ.md](docs/PREREQ.md)
 - Configure environment variables in `.env` file.
-- Run the local agent with `cd src && uv run main.py`
+- Run the local agent with `cd src && uv run python main.py --agent demo`
 - Deploy the same agent as a Foundry hosted agent with [docs/HOSTED_AGENT_DEPLOYMENT.md](docs/HOSTED_AGENT_DEPLOYMENT.md)
+- Invoke the hosted agent from Copilot CLI through the A2A MCP bridge in [docs/HOSTED_AGENT_DEPLOYMENT.md](docs/HOSTED_AGENT_DEPLOYMENT.md#5-enable-a2a-and-use-the-copilot-cli-bridge)
 - Review the walkthrough in [docs/SCRIPT.md](docs/SCRIPT.md)
 
 ### 🧠 Learning Outcomes

@@ -127,7 +127,7 @@ playwright-cli close
 Notes:
 
 - The tool first tries `playwright-cli` from PATH.
-- If not found, it falls back to `npx --no-install playwright-cli`.
+- If not found, it falls back to `npx --yes @playwright/cli@latest`.
 
 Optional environment variables:
 
@@ -136,7 +136,7 @@ Optional environment variables:
 
 ## 4. Final configuration checklist
 
-Before running `uv run main.py` from [src](../src), verify:
+Before running `uv run python main.py` from [src](../src), verify:
 
 1. `uv sync` completed.
 2. Node.js and `@playwright/cli` are installed and `playwright-cli --version` works.
