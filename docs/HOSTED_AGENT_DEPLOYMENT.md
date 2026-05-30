@@ -4,7 +4,7 @@ This demo can run locally or as a Microsoft Foundry hosted agent. Hosted mode pa
 
 The demo assumes Work IQ Mail MCP is already configured and working. The hosted agent intentionally starts with the mail MCP tools enabled; missing or invalid Work IQ settings should fail fast instead of silently disabling mailbox capabilities.
 
-Do not commit passwords, tokens, `.env` files, MSAL caches, or App Insights connection strings. Keep those values in your shell, your CI/CD secret store, or your Foundry deployment environment.
+Do not commit passwords, tokens, `.env` files, MSAL caches, or App Insights connection strings. Keep those values in your shell, your CI/CD secret store, or your Foundry deployment environment. Treat `DEM333_MSAL_CACHE_B64` and `DEM333_MSAL_CACHE_JSON` as secrets because they can contain refresh tokens.
 
 ## 1. Prerequisites
 
@@ -30,14 +30,17 @@ export HOSTED_AGENT_NAME="dem333-openclaw-agent"
 export APPLICATION_INSIGHTS_NAME="<app-insights-name>"
 
 export AZURE_TENANT_ID="<work-iq-tenant-id>"
-export AZURE_CLIENT_ID="<entra-public-client-app-id>"
+export DEM333_WORK_IQ_CLIENT_ID="<entra-public-client-app-id>"
+export DEM333_MSAL_CACHE_B64="$(base64 < ~/.dem333/msal_token_cache.json | tr -d '\n')"
 
 # Omit these env entries below if your hosted environment already provides OpenAI-compatible access.
 export OPENAI_BASE_URL="https://<foundry-account-name>.services.ai.azure.com/openai/v1"
 export OPENAI_API_KEY="<openai-compatible-api-key>"
 ```
 
-Before the hosted demo, confirm that your demo environment already has the required Work IQ auth bootstrap in place. This branch does not add an alternate mailbox mode, copy MSAL caches into the image, or accept delegated tokens through environment variables; it assumes the configured Work IQ MCP/auth path is available at runtime. Do not store the account password in this repository or in shell history.
+Before the hosted demo, sign in locally once so `~/.dem333/msal_token_cache.json` exists, then pass the serialized cache as a secret runtime environment variable. Hosted containers cannot complete an interactive browser login during readiness. For a short-lived smoke test, you can instead set `DEM333_WORK_IQ_ACCESS_TOKEN` to a Work IQ access token for `https://agent365.svc.cloud.microsoft`, but that direct-token mode only lasts until the token expires.
+
+Do not use `AZURE_CLIENT_ID` for the Work IQ app in hosted deployments. The hosted-agent runtime uses `AZURE_CLIENT_ID` to select its managed identity for Foundry storage, so setting it to the Work IQ public app ID breaks response persistence. Use `DEM333_WORK_IQ_CLIENT_ID` instead, or omit it when using `DEM333_WORK_IQ_ACCESS_TOKEN`.
 
 Then move to the container build context:
 
@@ -94,7 +97,10 @@ az cognitiveservices agent create \
     OPENAI_BASE_URL="$OPENAI_BASE_URL" \
     OPENAI_API_KEY="$OPENAI_API_KEY" \
     AZURE_TENANT_ID="$AZURE_TENANT_ID" \
-    AZURE_CLIENT_ID="$AZURE_CLIENT_ID" \
+    DEM333_WORK_IQ_CLIENT_ID="$DEM333_WORK_IQ_CLIENT_ID" \
+    DEM333_MSAL_CACHE_B64="$DEM333_MSAL_CACHE_B64" \
+    DEM333_DISABLE_INTERACTIVE_AUTH=true \
+    DEM333_DISABLE_CACHE_WRITE=true \
     APPLICATION_INSIGHTS_CONNECTION_STRING="$APPLICATION_INSIGHTS_CONNECTION_STRING" \
     AZURE_EXPERIMENTAL_ENABLE_GENAI_TRACING=true \
   --timeout 900 \

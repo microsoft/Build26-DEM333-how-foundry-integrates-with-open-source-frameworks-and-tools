@@ -19,7 +19,8 @@ RUN npm install -g @playwright/cli@latest \
     && npx --yes playwright install --with-deps chromium \
     && playwright-cli install --skills
 
-COPY pyproject.toml uv.lock README.md ./
+COPY pyproject.toml uv.lock ./
+RUN touch README.md
 RUN uv sync --locked --no-dev
 
 COPY dem333 ./dem333
