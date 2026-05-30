@@ -33,6 +33,10 @@ export AZURE_TENANT_ID="<work-iq-tenant-id>"
 export DEM333_WORK_IQ_CLIENT_ID="<entra-public-client-app-id>"
 export DEM333_MSAL_CACHE_B64="$(base64 < ~/.dem333/msal_token_cache.json | tr -d '\n')"
 
+export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT="SPAN_AND_EVENT"
+export OTEL_SEMCONV_STABILITY_OPT_IN="gen_ai_latest_experimental"
+export AZURE_EXPERIMENTAL_ENABLE_GENAI_TRACING="true"
+
 # Omit these env entries below if your hosted environment already provides OpenAI-compatible access.
 export OPENAI_BASE_URL="https://<foundry-account-name>.services.ai.azure.com/openai/v1"
 export OPENAI_API_KEY="<openai-compatible-api-key>"
@@ -102,12 +106,16 @@ az cognitiveservices agent create \
     DEM333_DISABLE_INTERACTIVE_AUTH=true \
     DEM333_DISABLE_CACHE_WRITE=true \
     APPLICATION_INSIGHTS_CONNECTION_STRING="$APPLICATION_INSIGHTS_CONNECTION_STRING" \
-    AZURE_EXPERIMENTAL_ENABLE_GENAI_TRACING=true \
+    OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT="$OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT" \
+    OTEL_SEMCONV_STABILITY_OPT_IN="$OTEL_SEMCONV_STABILITY_OPT_IN" \
+    AZURE_EXPERIMENTAL_ENABLE_GENAI_TRACING="$AZURE_EXPERIMENTAL_ENABLE_GENAI_TRACING" \
   --timeout 900 \
   --show-logs
 ```
 
 Use `APPLICATION_INSIGHTS_CONNECTION_STRING`, not `APPLICATIONINSIGHTS_CONNECTION_STRING`; the latter can be reserved by the hosted-agent service.
+
+The three OpenTelemetry environment variables above enable the Microsoft LangChain instrumentation path and allow App Insights spans/events to include the LangGraph agent input and output message content for the demo.
 
 ## 4. Invoke the hosted agent
 
