@@ -51,11 +51,11 @@ We start with ordinary open-source agent code, progressively add real tools and 
 
 *(stage) Switch to a single slide: "Goal: build our own OpenClaw using only open-source pieces, then graduate it to Foundry."*
 
-**F:** And for that... we broght to you an interesting setup. You've all seen *OpenClaw*, right? — this general-purpose agent that can browse the web, read your email, and what not. So today, we are going to **build our own OpenClaw, live**, using open-source frameworks and tools — and then..."
+**F:** And for that... we brought you an interesting setup. You've all seen *OpenClaw*, right? — this general-purpose agent that can browse the web, read your email, and whatnot. So today, we are going to **build our own OpenClaw, live**, using open-source frameworks and tools.
 
 *(stage) Slide: "Open-source agent code -> real tools -> hosted in Foundry -> observable -> callable by other agents.")*
 
-"we are going to show how **Microsoft Foundry takes that exact same code and supercharges it**. Sounds fun? Let's get started.
+**F:** We are going to show how **Microsoft Foundry takes that exact same code and supercharges it**. Sounds fun? Let's get started.
 
 ---
 
@@ -107,6 +107,7 @@ Hello! In one sentence, tell me what you can help with.
 **N:** This is useful, but it's still only a brain. If I ask it to read my email, it doesn't have any hands.
 
 **F:** Indeed. One of the things that make OpenClaw so popular is its ability to do things. What's the typical pattern to give access to tools?
+
 ---
 
 ## 4. Tools via MCP - connecting Work IQ Mail - 4.5 min
@@ -194,7 +195,7 @@ backend = CompositeBackend(
 
 **N:** We mount the local `dem333/skills` folder into a virtual `/skills/` path. The agent can list and read the markdown when it needs guidance.
 
-**F:** That's bold. Same model, same tools — but totally different behavior because of the resuable skill.
+**F:** That's bold. Same model, same tools — but totally different behavior because of the reusable skill.
 
 **N:** That's the big point. Skills are a lightweight way to make agent behavior repeatable without turning every instruction into a massive system prompt.
 
@@ -228,9 +229,9 @@ Open amazon.com and tell me the price of the first Microsoft-branded coffee cup 
 
 **F:** While this runs, I'm wondering - why did we use a different approach here compared to the MCP server from Work IQ?
 
-**N:** We could use an MCP server. However, that would create long instructions with the MCP server details that go to the context window. A more efficient approch these days is to use the command line. The Python tool schema stays tiny - one `args` string and an optional browser session. The page snapshots and command details only enter the context when the agent asks for them.
+**N:** We could use an MCP server. However, that would create long instructions with the MCP server details that go to the context window. A more efficient approach these days is to use the command line. The Python tool schema stays tiny - one `args` string and an optional browser session. The page snapshots and command details only enter the context when the agent asks for them.
 
-**F:** Got it. So this is not only easier to use for the model, it's also more token efficient. Ok, it's back now. 15 dolars for an xbox mug? It better be nice!
+**F:** Got it. So this is not only easier to use for the model, it's also more token efficient. Ok, it's back now. 15 dollars for an Xbox mug? It better be nice!
 
 **Prompt card - safer fallback**
 
@@ -252,7 +253,7 @@ Open https://build.microsoft.com/en-US/sessions/DEM333 and summarize the session
 
 *(stage) Open `src/server.py`.)*
 
-**N:** This is where Foundry can step in again. Foundry can hosts the same LangGraph agent and expose it behind the OpenAI-compatible Responses API. This file is the adapter layer. Notice that we still call the same `build_agent()` from `dem333.agent`.
+**N:** This is where Foundry can step in again. Foundry can host the same LangGraph agent and expose it behind the OpenAI-compatible Responses API. This file is the adapter layer. Notice that we still call the same `build_agent()` from `dem333.agent`.
 
 ```python
 app = ResponsesAgentServerHost(
@@ -325,7 +326,7 @@ export OTEL_SEMCONV_STABILITY_OPT_IN="gen_ai_latest_experimental"
 export AZURE_EXPERIMENTAL_ENABLE_GENAI_TRACING="true"
 ```
 
-**F:** And OpenTelemetry with semantic conventions means it's the same format across the industry, i can ready it with any tool, no vendor lock in, just data. Cool.
+**F:** And OpenTelemetry with semantic conventions means it's the same format across the industry, I can read it with any tool, no vendor lock-in, just data. Cool.
 
 **Prompt card - generate trace traffic**
 
@@ -395,7 +396,7 @@ Use the ask_dem333_agent tool to ask: check my inbox using Work IQ Mail and retu
 
 *(stage) Copilot CLI calls the MCP bridge; the bridge invokes the Foundry A2A endpoint; the hosted LangGraph agent uses Work IQ MCP and Skills; the answer appears back in Copilot CLI.)*
 
-**F:** Pause on what just happened. So Copilot CLI, a totally different agent runtime, called an MCP tool. That tool used A2A to reached our LangGraph agent hosted in Foundry, which then used Work IQ MCP server, applied a skill, and answered. **None of those pieces had to know about each other.** Impressive.
+**F:** Pause on what just happened. So Copilot CLI, a totally different agent runtime, called an MCP tool. That tool used A2A to reach our LangGraph agent hosted in Foundry, which then used Work IQ MCP server, applied a skill, and answered. **None of those pieces had to know about each other.** Impressive.
 
 **N:** And I'll give you something extra. The trace now follows that handoff. In App Insights, the local bridge span `invoke_agent dem333_foundry_a2a` and the hosted `invoke_agent LangGraph` span share the same operation ID, so we can explain both interop and observability in one screen.
 
