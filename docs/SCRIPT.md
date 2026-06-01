@@ -131,7 +131,7 @@ mcp_tools = await mcp_client.get_tools()
 return configure_work_iq_tool_error_handling(mcp_tools)
 ```
 
-**F:** So you're saying I can take *any* LangGraph agent I already have, and just plug this server over the open protocol?
+**F:** So you're saying I can take *any* LangGraph agent I already have, and just plug this server over the open protocol to give it access to Work IQ?
 
 **N:** Exactly. Let's show the difference.
 
@@ -272,7 +272,7 @@ host = ResponsesHostServer(
 1. `ResponsesHostServer` exposes the LangGraph agent as a Responses-compatible endpoint.
 2. We initialize the Foundry server host before building the graph so OpenTelemetry/LangChain instrumentation can attach before the graph is constructed.
 
-**F:** If I'm reading this correctly, you are wrapping the agent. So the same code path can run locally in the console or remotely, right?
+**F:** If I'm reading this correctly, you are wrapping the agent in the protocol. So the same code path can run locally in the console or remotely, right?
 
 **N:** Correct. For the talk, the agent is already deployed as `dem333-openclaw-agent`. If we need to show the deployment path, the runbook is in `docs/HOSTED_AGENT_DEPLOYMENT.md`.
 
@@ -325,7 +325,7 @@ export OTEL_SEMCONV_STABILITY_OPT_IN="gen_ai_latest_experimental"
 export AZURE_EXPERIMENTAL_ENABLE_GENAI_TRACING="true"
 ```
 
-**F:** That's the kind of detail you need to have confidence to move something to production.
+**F:** And OpenTelemetry with semantic conventions means it's the same format across the industry, i can ready it with any tool, no vendor lock in, just data. Cool.
 
 **Prompt card - generate trace traffic**
 
