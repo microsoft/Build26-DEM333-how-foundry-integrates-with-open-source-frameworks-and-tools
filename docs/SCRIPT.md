@@ -332,7 +332,7 @@ export AZURE_EXPERIMENTAL_ENABLE_GENAI_TRACING="true"
 In one sentence, say this request is generating DEM333 OpenTelemetry input and output capture traffic.
 ```
 
-**Fallback:** If the portal view is slow, use a prepared App Insights query result that shows recent version 6 `invoke_agent LangGraph` rows with non-empty input and output capture counts.
+**Fallback:** If the portal view is slow, use a prepared App Insights query result that shows recent `invoke_agent LangGraph` rows with non-empty input and output capture counts.
 
 ---
 
@@ -348,9 +348,9 @@ In one sentence, say this request is generating DEM333 OpenTelemetry input and o
 
 ```python
 @mcp.tool()
-async def ask_dem333_agent(message: str) -> str:
+async def ask_dem333_agent(message: str, ctx: Context) -> str:
     """Ask the DEM333 Foundry hosted agent through its A2A endpoint."""
-    return await invoke_foundry_a2a(message)
+    return await invoke_foundry_a2a(message, ctx)
 ```
 
 *(stage) Direct bridge smoke test.)*
@@ -359,6 +359,7 @@ async def ask_dem333_agent(message: str) -> str:
 cd src
 export FOUNDRY_A2A_URL="${AZURE_AI_PROJECT_ENDPOINT}/agents/${HOSTED_AGENT_NAME}/endpoint/protocols/a2a"
 export FOUNDRY_A2A_AGENT_CARD_PATH="agentCard/v0.3"
+export APPLICATIONINSIGHTS_CONNECTION_STRING="${APPLICATION_INSIGHTS_CONNECTION_STRING}"
 
 uv run python -m dem333.copilot_a2a_bridge --message "Reply exactly A2A bridge ready."
 ```
@@ -374,7 +375,8 @@ cat > /tmp/copilot-a2a-bridge.json <<JSON
       "args": ["--directory", "$PWD", "run", "python", "-m", "dem333.copilot_a2a_bridge"],
       "env": {
         "FOUNDRY_A2A_URL": "$FOUNDRY_A2A_URL",
-        "FOUNDRY_A2A_AGENT_CARD_PATH": "agentCard/v0.3"
+        "FOUNDRY_A2A_AGENT_CARD_PATH": "agentCard/v0.3",
+        "APPLICATIONINSIGHTS_CONNECTION_STRING": "$APPLICATION_INSIGHTS_CONNECTION_STRING"
       }
     }
   }
@@ -393,6 +395,8 @@ Use the ask_dem333_agent tool to ask: check my inbox using Work IQ Mail and retu
 *(stage) Copilot CLI calls the MCP bridge; the bridge invokes the Foundry A2A endpoint; the hosted LangGraph agent uses Work IQ MCP and Skills; the answer appears back in Copilot CLI.)*
 
 **F:** Pause on what happened. Copilot CLI, a different agent runtime, called an MCP tool. That tool crossed into A2A. A2A reached our LangGraph agent hosted in Foundry. That agent then used another MCP server, Work IQ Mail, and applied a Skill. None of these pieces had to be built into one monolith.
+
+**N:** And the trace now follows that handoff. In App Insights, the local bridge span `invoke_agent dem333_foundry_a2a` and the hosted `invoke_agent LangGraph` span share the same operation ID, so we can explain both interop and observability in one screen.
 
 **N:** That is the open-source integration story: framework, tools, skills, hosting, telemetry, and agent-to-agent interoperability.
 

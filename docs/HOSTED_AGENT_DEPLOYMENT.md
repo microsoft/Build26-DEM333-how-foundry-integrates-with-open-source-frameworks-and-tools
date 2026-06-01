@@ -16,6 +16,8 @@ You need:
 4. OpenAI-compatible model access for `init_chat_model("openai:gpt-5.2")`, either preconfigured in the hosted environment or supplied through secret-backed environment variables.
 5. A configured Work IQ Mail MCP tenant and Entra public-client app registration.
 6. An Application Insights resource if you want hosted traces.
+7. `azd` with the Foundry agent extensions if you want the CLI invoke path:
+   `azd ext install microsoft.foundry`; if `azd ai agent` is unavailable, also run `azd ext install azure.ai.agents`.
 
 Set these values for your environment:
 
@@ -65,7 +67,6 @@ az acr build \
   --registry "$AZURE_CONTAINER_REGISTRY_NAME" \
   --image "${HOSTED_AGENT_NAME}:${TAG}" \
   --platform linux/amd64 \
-  --source-acr-auth-id "[caller]" \
   .
 ```
 
@@ -216,10 +217,13 @@ curl -fsS \
 
 The local Copilot A2A bridge in `dem333/copilot_a2a_bridge.py` lets Copilot CLI call the hosted A2A endpoint through a normal Copilot MCP tool. It uses Azure CLI to get a Foundry access token unless `FOUNDRY_A2A_TOKEN` is already set.
 
+If `APPLICATIONINSIGHTS_CONNECTION_STRING` or `APPLICATION_INSIGHTS_CONNECTION_STRING` is present, the bridge also exports a local span named `invoke_agent dem333_foundry_a2a` and forwards W3C trace context to the hosted A2A endpoint. In App Insights, that local bridge span and the hosted `invoke_agent LangGraph` spans should share the same `operation_Id`.
+
 Direct smoke test:
 
 ```bash
 cd src
+export APPLICATIONINSIGHTS_CONNECTION_STRING="$APPLICATION_INSIGHTS_CONNECTION_STRING"
 uv run python -m dem333.copilot_a2a_bridge --message "Reply exactly DIRECT_A2A_OK."
 ```
 
@@ -234,7 +238,8 @@ cat > /tmp/copilot-a2a-bridge.json <<JSON
       "args": ["--directory", "$PWD", "run", "python", "-m", "dem333.copilot_a2a_bridge"],
       "env": {
         "FOUNDRY_A2A_URL": "$FOUNDRY_A2A_URL",
-        "FOUNDRY_A2A_AGENT_CARD_PATH": "agentCard/v0.3"
+        "FOUNDRY_A2A_AGENT_CARD_PATH": "agentCard/v0.3",
+        "APPLICATIONINSIGHTS_CONNECTION_STRING": "$APPLICATION_INSIGHTS_CONNECTION_STRING"
       }
     }
   }
@@ -249,3 +254,15 @@ Then ask Copilot CLI:
 ```text
 Use the ask_dem333_agent tool to ask: what are the top 3 things in my inbox right now?
 ```
+
+To verify trace stitching after a direct bridge or Copilot CLI call, query App Insights for a recent trace that contains both roles:
+
+```kusto
+union isfuzzy=true dependencies, traces, requests, customEvents
+| where timestamp > ago(30m)
+| where operation_Id == "<trace-id>"
+| project timestamp, itemType, cloud_RoleName, name, message, operation_ParentId, customDimensions
+| order by timestamp asc
+```
+
+Expected rows include `dem333-copilot-a2a-bridge-local` / `invoke_agent dem333_foundry_a2a` with `dem333.a2a.trace_context_propagated=True`, followed by hosted `dem333-openclaw-agent` or `dem333-openclaw-agent-stitched` spans such as `invoke_agent LangGraph`, `model`, and `chat gpt-5.2...`.
