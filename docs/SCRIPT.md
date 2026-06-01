@@ -49,8 +49,6 @@ We start with ordinary open-source agent code, progressively add real tools and 
 
 **F:** Today's question is simple: if your agent already exists in LangGraph, MCP, or plain Python, how do you move it to production without rewriting it?
 
-**F:** To demostrate this, we broght you an interesting setup. I'm sure you are all familiar with OpenClaw right? This We'll build an OpenClaw-style agent from developer-native pieces, then show where Foundry adds the production layer: hosting, observability, and agent-to-agent access.
-
 *(stage) Switch to a single slide: "Goal: build our own OpenClaw using only open-source pieces, then graduate it to Foundry."*
 
 **F:** And for that... we broght to you an interesting setup. You've all seen *OpenClaw*, right? — this general-purpose agent that can browse the web, read your email, and what not. So today, we are going to **build our own OpenClaw, live**, using open-source frameworks and tools — and then..."
