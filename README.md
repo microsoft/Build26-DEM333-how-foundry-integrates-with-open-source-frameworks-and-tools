@@ -1,36 +1,3 @@
-# 🚀 Get Started
-
-**This repo is where attendees go to continue their learning after your session — and your Copilot agent will help you set it up.**
-
-### Step 1: Open your repo
-
-Open this repo in a **Codespace** (click the green **Code** button → **Create a Codespace**) — or clone it locally. Then open **GitHub Copilot Chat**.
-
-### Step 2: Add your content
-
-Give the agent something to work with. Drag files into the Explorer panel — session abstracts, outlines, screenshots, notes — and drop them in one of two places:
-
-| Where to put it | What goes there | Who sees it |
-|---|---|---|
-| **`_remove-before-publish/`** | Internal reference materials (abstracts, outlines, screenshots, planning docs) | **Copilot only** — never published |
-| **`/docs/`, `/src/`, or repo root** | Lab instructions, demo code, sample data, getting-started guides | **Attendees** — published with the repo |
-
-> 💡 Not sure? Start by dropping your session abstract or outline into `_remove-before-publish/`. The agent will figure out what to do with it.
-
-### Step 3: Ask the Agent
-
-Once your content is in the repo, use these three phrases with Copilot to build out your session repo:
-
-| Phrase to use with Copilot | What it does | When to run it |
-|---|---|---|
-| **"Help me get started"** | Sets up session title, description, outcomes, and owners | After you've added your session abstract or outline to the repo |
-| **"Help me refine content"** | Organizes your session content into the repo | Each time you add or update content |
-| **"Help me finalize"** | Final review, cleanup, and publication prep | When you're ready to publish |
-
-> 💡 **These three phrases are just the starting point.** Copilot can do much more — try asking it to brainstorm next steps for attendees, generate code samples, or build out your repo structure. Don't be afraid to put it in plan mode and ask for what you need.
-
----
-
 <a name="start-building"></a>
 <br>
 <p align="center">
@@ -39,49 +6,61 @@ Once your content is in the repo, use these three phrases with Copilot to build 
 
 # [Microsoft Build 2026](https://build.microsoft.com)
 
-## 🔥 BRKXXX: SESSION TITLE
+## 🔥 DEM333: How Foundry Integrates With Open Source Frameworks and Tools
 
 ### Session Description
 
-*Add Session Description*
+This demo walks through building a practical OpenClaw like agent using open-source technologies and then operationalizing the same solution in Microsoft Foundry. You will see how to connect enterprise tools with the Model Context Protocol, codify repeatable behavior with skills, add browser automation with Playwright CLI, observe with OpenTelemetry, and move from local development to cloud-hosted agents using open protocols like Responses API and A2A agent-to-agent communication.
 
-### 🏫 Getting started in a guided session
+### 🚀 Getting started
 
-To get started in a guided lab session:
-- <!-- step 1 -->
-- <!-- step 2 -->
-- <!-- step 3 -->
-
-### 🏠 Getting started in your own environment
-
-If you're following these steps at your own pace:
+If you're following this demo at your own pace:
 - Clone this repository
-- Set up your development environment
-- <!-- step 3 -->
+- Follow the setup instructions in [docs/PREREQ.md](docs/PREREQ.md)
+- Configure environment variables in `.env` file.
+- Run the local agent with `cd src && uv run python main.py --agent demo`
+- Deploy the same agent as a Foundry hosted agent with [docs/HOSTED_AGENT_DEPLOYMENT.md](docs/HOSTED_AGENT_DEPLOYMENT.md)
+- Invoke the hosted agent from Copilot CLI through the Copilot A2A bridge in [docs/HOSTED_AGENT_DEPLOYMENT.md](docs/HOSTED_AGENT_DEPLOYMENT.md#5-enable-a2a-and-use-the-copilot-cli-bridge)
+- Review the walkthrough in [docs/SCRIPT.md](docs/SCRIPT.md)
 
 ### 🧠 Learning Outcomes
 
-By the end of this session, you will be able to:
+By the end of this demo, you will be able to:
 
-- <!-- outcome 1 -->
-- <!-- outcome 2 -->
-- <!-- outcome 3 -->
+- Build a LangGraph-based agent loop and connect it to external enterprise actions by using the Model Context Protocol.
+- Improve agent quality by combining reusable skills with focused tool surfaces such as Work IQ mail tools and Playwright CLI browser actions.
+- Expose an open-source agent implementation through Microsoft Foundry endpoints and understand how to add tracing and cross-agent interoperability.
 
 ### 💬 Keep Learning with Copilot
 
-Try these prompts with GitHub Copilot to explore the topics from this session. Open Copilot Chat in VS Code (`Ctrl+Alt+I` on Windows/Linux, `Cmd+Shift+I` on Mac), paste a prompt, and see what you learn. Try connecting the [Microsoft Learn MCP Server](#-microsoft-learn-mcp-server) for the latest official documentation.
+Try these prompts with GitHub Copilot to explore the topics from this demo. Open Copilot Chat in Visual Studio Code (`Ctrl+Alt+I` on Windows/Linux, `Cmd+Shift+I` on Mac), paste a prompt, and see what you learn. Try connecting the [Microsoft Learn MCP Server](#-microsoft-learn-mcp-server) for the latest official documentation.
 
-Use these as a starting point — or write your own!
+1. Understand the architecture and building blocks:
 
-<!-- Prompts will be tailored to this session's content during repo setup. -->
+```text
+Explain the architecture in this DEM333 repo, including how LangGraph, skills, MCP tools, and Microsoft Foundry fit together. Then suggest one beginner-friendly extension to implement first.
+```
 
-> *Prompts coming soon — check back after the session content is finalized.*
+2. Ground setup guidance with official documentation:
+
+```text
+Using the Microsoft Learn MCP Server, find the latest Microsoft Foundry and Model Context Protocol docs needed for this repo, then produce a concise setup checklist for local development and deployment.
+```
+
+3. Build an advanced extension:
+
+```text
+Help me add a new skill that summarizes inbox triage results into a daily digest, and update the agent flow so it can call that skill after classification. Include tests and a short validation plan.
+```
 
 ### 💻 Technologies Used
 
-1. <!-- technology 1 -->
-1. <!-- technology 2 -->
-1. <!-- technology 3 -->
+1. [LangChain for Azure](https://aka.ms/azureai/langchain)
+1. [Microsoft Foundry Models](https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview)
+1. [Azure OpenAI in Microsoft Foundry Models v1 API](https://learn.microsoft.com/azure/foundry/openai/api-version-lifecycle)
+1. [Model Context Protocol tooling in Microsoft Foundry Agents](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/model-context-protocol)
+1. [Tracing and observability in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/observability/how-to/trace-agent-setup)
+1. [Microsoft Entra ID app registration quickstart](https://learn.microsoft.com/entra/identity-platform/quickstart-register-app)
 
 ### 📚 Resources and Next Steps
 
@@ -92,11 +71,11 @@ Use these as a starting point — or write your own!
 
 ### 🌟 Microsoft Learn MCP Server
 
-The Microsoft Learn MCP Server gives your AI agent direct access to Microsoft's official documentation — grounded, up-to-date answers about the products and services covered in this session.
+The Microsoft Learn MCP Server gives your AI agent direct access to Microsoft's official documentation — grounded, up-to-date answers about the products and services covered in this demo.
 
-**VS Code** — One click installation: 
+**Visual Studio Code** — One click installation: 
 
-[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_Microsoft_Learn_MCP-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=microsoft-learn&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Flearn.microsoft.com%2Fapi%2Fmcp%22%7D)
+[![Install in Visual Studio Code](https://img.shields.io/badge/VS_Code-Install_Microsoft_Learn_MCP-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=microsoft-learn&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Flearn.microsoft.com%2Fapi%2Fmcp%22%7D)
 
 
 **GitHub Copilot CLI** — Run this to install the Learn MCP Server as a plugin:
@@ -108,17 +87,17 @@ For more info, other clients, and to post questions, visit the [Learn MCP Server
 
 ## Content Owners
 
-<!-- TODO: Add yourself as a content owner
-1. Change the src in the image tag to {your github url}.png
-2. Change INSERT NAME HERE to your name
-3. Change the github url in the final href to your url. -->
-
 <table>
 <tr>
-    <td align="center"><a href="http://github.com/yourGitHubHandle">
-        <img src="https://github.com/yourGitHubHandle.png" width="100px;" alt="INSERT NAME HERE"/><br />
-        <sub><b>INSERT NAME HERE</b></sub></a><br />
-            <a href="https://github.com/yourGitHubHandle" title="talk">📢</a>
+    <td align="center"><a href="https://github.com/santiagxf">
+        <img src="https://avatars.githubusercontent.com/u/32112894?v=4" width="100px;" alt="Facundo Santiago"/><br />
+        <sub><b>Facundo Santiago</b></sub></a><br />
+            <a href="https://github.com/santiagxf" title="talk">📢</a>
+    </td>
+    <td align="center"><a href="https://github.com/nagkumar91">
+        <img src="https://github.com/nagkumar91.png?size=100" width="100px;" alt="nagkumar91"/><br />
+        <sub><b>nagkumar91</b></sub></a><br />
+            <a href="https://github.com/nagkumar91" title="code">💻</a>
     </td>
 </tr></table>
 
