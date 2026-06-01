@@ -41,41 +41,27 @@ We start with ordinary open-source agent code, progressively add real tools and 
 
 ---
 
-## 1. Introduction - 2 min
+## 1. Hook - why this matters - 3 min
 
 *(stage) Title slide is up. Camera on both speakers.*
 
-**F:** Welcome everyone. I'm Facundo from Microsoft Foundry, and this is **How Foundry Integrates With Open Source Frameworks and Tools**. I'm joined by Nagkumar, who is going to drive the keyboard today.
+**F:** Welcome. I'm Facundo, and this is **How Foundry Integrates With Open Source Frameworks and Tools**. Nagkumar is going to drive the demo.
 
-**F:** Quick show of hands: how many of you have built an agent with LangChain, LangGraph, Microsoft Agent Framework, or another open-source stack? And how many of you have wondered, "If I already have this code, how does Foundry fit in?"
+**F:** Today's question is simple: if your agent already exists in LangGraph, MCP, or plain Python, how do you move it to production without rewriting it?
 
-**F:** That's the question for this session. We're not going to start with a proprietary agent. We're going to start with normal open-source code, add real tools, run it locally, then graduate that exact shape into Foundry.
+*(stage) Slide: "Open-source agent code -> real tools -> hosted in Foundry -> observable -> callable by other agents.")*
 
-**N:** The goal is to show the connective tissue: open-source frameworks for the agent loop, MCP for tools, Skills for behavior, Playwright for browser work, Foundry for hosting and observability, and A2A for other agents to call it.
+**F:** We'll build an OpenClaw-style agent from developer-native pieces, then show where Foundry adds the production layer: hosting, observability, and agent-to-agent access.
 
----
+**F:** I'll frame each layer. Nagkumar will keep the code moving.
 
-## 2. Objective - build our own OpenClaw-style agent - 2 min
+**F:** The punchline is: **bring your agent, keep your framework, and let Foundry provide the production surface around it.**
 
-*(stage) Slide: "Goal: build our own OpenClaw-style agent using open-source pieces, then host and observe it in Foundry.")*
-
-**F:** The fun framing is: let's build our own OpenClaw-style agent. Something that can reason, read work context, use a browser, and take actions - but built from pieces developers already know.
-
-**F:** The punchline we want people to remember is not "rewrite your agent for Foundry." It is: **bring your agent, keep your framework, and let Foundry provide the production surface around it.**
-
-**N:** Exactly. I'll show the code in layers:
-
-1. a minimal LangGraph/deepagents loop,
-2. MCP tools from Work IQ,
-3. Skills as reusable instructions,
-4. Playwright CLI as a browser tool,
-5. Foundry hosting through Responses API,
-6. tracing and telemetry,
-7. and finally A2A from Copilot CLI.
+**N:** Let's start with the smallest useful agent and add one capability at a time.
 
 ---
 
-## 3. Minimal agent loop in LangGraph - 3 min
+## 2. Minimal agent loop in LangGraph - 3 min
 
 **F:** Nagku, start at the bottom. If I want to build an agent today - no hosting, no platform magic - what is the smallest useful shape?
 
@@ -103,7 +89,7 @@ return create_deep_agent(
 
 ---
 
-## 4. First interaction in the console - 1.5 min
+## 3. First interaction in the console - 1.5 min
 
 *(stage) Open integrated terminal. Venv already active. From repo root, remember the Python project is under `src/`.)*
 
@@ -126,7 +112,7 @@ Hello! In one sentence, tell me what you can help with.
 
 ---
 
-## 5. Tools via MCP - connecting Work IQ Mail - 4 min
+## 4. Tools via MCP - connecting Work IQ Mail - 4.5 min
 
 **F:** How do we give this agent real capabilities without hard-coding one-off integrations?
 
@@ -174,7 +160,7 @@ Check my inbox using Work IQ Mail. Do not include senders, subjects, body text, 
 
 ---
 
-## 6. Skills - teaching the agent how to use tools - 4 min
+## 5. Skills - teaching the agent how to use tools - 4 min
 
 **F:** Tools give the agent verbs. But if I ask for "triage my inbox," I don't want it randomly deciding what triage means every time.
 
@@ -217,7 +203,7 @@ Triage my inbox. Use the inbox triage skill. Do not include senders, subjects, b
 
 ---
 
-## 7. Sophisticated tools - Playwright browser - 4 min
+## 6. Sophisticated tools - Playwright browser - 4 min
 
 **F:** The other thing people expect from an OpenClaw-style agent is browser work. What is the open-source pattern there?
 
@@ -259,7 +245,7 @@ Open https://build.microsoft.com/en-US/sessions/DEM333 and summarize the session
 
 ---
 
-## 8. From console to cloud - Foundry Responses API - 3 min
+## 7. From console to cloud - Foundry Responses API - 3 min
 
 **F:** This is great locally, but nobody wants production users SSH-ing into your laptop. How does Foundry help without forcing us to rewrite the agent?
 
@@ -314,7 +300,7 @@ In one sentence, explain why the Foundry Responses API can host this LangGraph a
 
 ---
 
-## 9. Observability - OpenTelemetry and App Insights - 3 min
+## 8. Observability - OpenTelemetry and App Insights - 3 min
 
 **F:** Once the agent is in the cloud, the next production question is: can we see what it is doing?
 
@@ -350,7 +336,7 @@ In one sentence, say this request is generating DEM333 OpenTelemetry input and o
 
 ---
 
-## 10. A2A - calling the hosted agent from Copilot CLI - 2.5 min
+## 9. A2A - calling the hosted agent from Copilot CLI - 2.5 min
 
 **F:** Last question. If 2026 is all about agents working with other agents, can another agent call this one?
 
@@ -412,7 +398,7 @@ Use the ask_dem333_agent tool to ask: check my inbox using Work IQ Mail and retu
 
 ---
 
-## 11. Wrap-up - 1 min
+## 10. Wrap-up - 1.5 min
 
 *(stage) End slide with QR code / repo URL.)*
 
@@ -430,17 +416,16 @@ Use the ask_dem333_agent tool to ask: check my inbox using Work IQ Mail and retu
 
 | Section | Time | Cumulative |
 |---|---:|---:|
-| 1. Intro | 2:00 | 2:00 |
-| 2. Objective / OpenClaw-style framing | 2:00 | 4:00 |
-| 3. LangGraph agent loop | 3:00 | 7:00 |
-| 4. First console interaction | 1:30 | 8:30 |
-| 5. MCP - Work IQ Mail | 4:00 | 12:30 |
-| 6. Skills - inbox triage | 4:00 | 16:30 |
-| 7. Playwright browser | 4:00 | 20:30 |
-| 8. Responses API on Foundry | 3:00 | 23:30 |
-| 9. OpenTelemetry | 3:00 | 26:30 |
-| 10. A2A from Copilot CLI | 2:30 | 29:00 |
-| 11. Wrap-up | 1:00 | 30:00 |
+| 1. Hook / why this matters | 3:00 | 3:00 |
+| 2. LangGraph agent loop | 3:00 | 6:00 |
+| 3. First console interaction | 1:30 | 7:30 |
+| 4. MCP - Work IQ Mail | 4:30 | 12:00 |
+| 5. Skills - inbox triage | 4:00 | 16:00 |
+| 6. Playwright browser | 4:00 | 20:00 |
+| 7. Responses API on Foundry | 3:00 | 23:00 |
+| 8. OpenTelemetry | 3:00 | 26:00 |
+| 9. A2A from Copilot CLI | 2:30 | 28:30 |
+| 10. Wrap-up / Q&A buffer | 1:30 | 30:00 |
 
 ---
 
