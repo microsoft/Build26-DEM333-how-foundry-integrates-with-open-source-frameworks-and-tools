@@ -215,16 +215,17 @@ curl -fsS \
   "${FOUNDRY_A2A_URL}/${FOUNDRY_A2A_AGENT_CARD_PATH}" >/dev/null
 ```
 
-The local Copilot A2A bridge in `dem333/copilot_a2a_bridge.py` lets Copilot CLI call the hosted A2A endpoint through a normal Copilot MCP tool. It uses Azure CLI to get a Foundry access token unless `FOUNDRY_A2A_TOKEN` is already set.
+The local A2A directory bridge in `dem333/a2a/` lets Copilot CLI search configured A2A agents and call one through a normal Copilot MCP tool. It uses Azure CLI to get a Foundry access token unless `FOUNDRY_A2A_TOKEN` is already set.
 
-If `APPLICATIONINSIGHTS_CONNECTION_STRING` or `APPLICATION_INSIGHTS_CONNECTION_STRING` is present, the bridge also exports a local span named `invoke_agent dem333_foundry_a2a` and forwards W3C trace context to the hosted A2A endpoint. In App Insights, that local bridge span and the hosted `invoke_agent LangGraph` spans should share the same `operation_Id`.
+If `APPLICATIONINSIGHTS_CONNECTION_STRING` or `APPLICATION_INSIGHTS_CONNECTION_STRING` is present, the bridge also exports a local span named `invoke_agent <agent_id>` and forwards W3C trace context to the hosted A2A endpoint. In App Insights, that local bridge span and the hosted `invoke_agent LangGraph` spans should share the same `operation_Id`.
 
 Direct smoke test:
 
 ```bash
 cd src
 export APPLICATIONINSIGHTS_CONNECTION_STRING="$APPLICATION_INSIGHTS_CONNECTION_STRING"
-uv run python -m dem333.copilot_a2a_bridge --message "Reply exactly DIRECT_A2A_OK."
+uv run python -m dem333.a2a --search "inbox triage"
+uv run python -m dem333.a2a --agent-id "$HOSTED_AGENT_NAME" --message "Reply exactly DIRECT_A2A_OK."
 ```
 
 Run Copilot CLI with the bridge:
@@ -233,9 +234,9 @@ Run Copilot CLI with the bridge:
 cat > /tmp/copilot-a2a-bridge.json <<JSON
 {
   "mcpServers": {
-    "copilot-a2a-bridge": {
+    "a2a-directory": {
       "command": "uv",
-      "args": ["--directory", "$PWD", "run", "python", "-m", "dem333.copilot_a2a_bridge"],
+      "args": ["--directory", "$PWD", "run", "python", "-m", "dem333.a2a"],
       "env": {
         "FOUNDRY_A2A_URL": "$FOUNDRY_A2A_URL",
         "FOUNDRY_A2A_AGENT_CARD_PATH": "agentCard/v0.3",
@@ -252,7 +253,7 @@ copilot --additional-mcp-config @/tmp/copilot-a2a-bridge.json --allow-all-tools 
 Then ask Copilot CLI:
 
 ```text
-Use the ask_dem333_agent tool to ask: what are the top 3 things in my inbox right now?
+Search for an agent that can triage inbox messages, then call it using A2A. Return only priority/category labels and a total message count. Do not include senders, subjects, body text, or personal data.
 ```
 
 To verify trace stitching after a direct bridge or Copilot CLI call, query App Insights for a recent trace that contains both roles:
@@ -265,4 +266,4 @@ union isfuzzy=true dependencies, traces, requests, customEvents
 | order by timestamp asc
 ```
 
-Expected rows include `dem333-copilot-a2a-bridge-local` / `invoke_agent dem333_foundry_a2a` with `dem333.a2a.trace_context_propagated=True`, followed by hosted `dem333-openclaw-agent` or `dem333-openclaw-agent-stitched` spans such as `invoke_agent LangGraph`, `model`, and `chat gpt-5.2...`.
+Expected rows include `dem333-a2a-directory-local` / `invoke_agent <agent_id>` with `dem333.a2a.trace_context_propagated=True`, followed by hosted `dem333-openclaw-agent` or `dem333-openclaw-agent-stitched` spans such as `invoke_agent LangGraph`, `model`, and `chat gpt-5.2...`.
