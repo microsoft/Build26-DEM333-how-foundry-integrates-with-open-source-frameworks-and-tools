@@ -61,7 +61,7 @@ We start with ordinary open-source agent code, progressively add real tools and 
 
 ## 2. Minimal agent loop in LangGraph - 3 min
 
-**F:** Nagku, start at the bottom. If I want to build an agent today - no hosting, no platform magic - what's the smallest amount of code I need?
+**F:** So, let's start at the bottom. If I want to build an agent today - no hosting, no platform magic - what's the smallest amount of code I need?
 
 *(stage) Open `src/dem333/agent_base.py`.)*
 
