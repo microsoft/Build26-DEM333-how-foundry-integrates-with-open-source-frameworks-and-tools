@@ -81,7 +81,7 @@ return create_deep_agent(
 )
 ```
 
-**N:** The important point is that this is ordinary LangChain/LangGraph-style code. Most Foundry models expose OpenAI-compatible APIs, so LangChain can talk to a Foundry model deployment using the protocol it already understands. The model target is configuration, not a rewrite.
+**N:** The important point is that this is ordinary LangChain/LangGraph-style code. Most Foundry models expose OpenAI-compatible APIs, so LangChain can talk to a Foundry model deployment using the protocol it already understands. Changing the model target is configuration, not a rewrite.
 
 **F:** So in this case, LangChain owns the agent loop, and Foundry provides the model via the OpenAI-compatible protocol.
 
@@ -108,7 +108,7 @@ Hello! In one sentence, tell me what you can help with.
 
 *(stage) Type the prompt. The DEM333 banner appears, the agent replies with a generic assistant response.)*
 
-**N:** This is useful, but it's still only a brain. If I ask it to read my email, it doesn't have any hands.
+**N:** This is useful, but it still cannot do work outside the model. To read email, it needs tools.
 
 **F:** Right. One reason agents like OpenClaw are useful is that they can do things. What is the usual pattern for giving an agent tools?
 
@@ -170,7 +170,7 @@ check my email
 
 *(stage) Open `src/dem333/skills/inbox-triage/SKILL.md`.)*
 
-**N:** A Skill is simple: it is a markdown playbook with a small frontmatter block. No special service. No proprietary schema. The agent reads it only when the prompt is relevant.
+**N:** A Skill is simple: a markdown playbook with a small frontmatter block. No special service. No proprietary schema. The agent reads it only when the prompt is relevant.
 
 **N:** Now I'll restart with the Skills-enabled agent. This can take a moment because the agent has to decide whether the prompt is relevant to a Skill, read that Skill, then use the same Work IQ tools under that guidance.
 *(stage) Restart with the skills-enabled agent.)*
@@ -290,7 +290,7 @@ host = ResponsesHostServer(
 
 **N:** Correct. For the talk, the agent is already deployed as `dem333-openclaw-agent-stitched`.
 
-**N:** I'll send one hosted smoke request next. Hosted calls can take a moment if the container is warming, so while it runs, I'll call out that this is the same `build_agent()` path now reached through the Responses API.
+**N:** I'll send the same triage prompt to the hosted agent next. Hosted calls can take a moment if the container is warming, so while it runs, I'll call out that this is the same `build_agent()` path now reached through the Responses API.
 
 *(stage) Optional: show the shape of the smoke test, not the full JSON response.)*
 
@@ -365,7 +365,7 @@ triage my inbox
 
 ## 9. A2A - calling the hosted agent from Copilot CLI - 2 min
 
-**F:** Last question. Everyone is talking about agents working with other agents. Can another agent call this one?
+**F:** Last question. They say that 2026 is all about agents working with other agents, can another agent call this one?
 
 **N:** Yes. Once the Foundry A2A endpoint is enabled, another A2A-compatible client can discover the agent card and send messages to the hosted agent.
 
@@ -383,7 +383,7 @@ async def call_agent_a2a(agent_id: str, message: str, ctx: Context) -> str:
     """Call one configured A2A agent by ID. Use search_agent first."""
 ```
 
-**N:** Instead of doing a separate smoke test, I'll go straight to the real A2A call from Copilot CLI. Startup and tool registration can take a moment, so while it opens, watch for two tool names: `search_agent` and `call_agent_a2a`.
+**N:** I'll open Copilot CLI with the A2A directory loaded. Startup and tool registration can take a moment, so while it opens, watch for two tool names: `search_agent` and `call_agent_a2a`.
 
 *(stage) Then start Copilot CLI with the bridge.)*
 
