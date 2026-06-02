@@ -31,7 +31,7 @@ export AZURE_CONTAINER_REGISTRY_NAME="<acr-name>"
 export HOSTED_AGENT_NAME="dem333-openclaw-agent"
 export APPLICATION_INSIGHTS_NAME="<app-insights-name>"
 
-export AZURE_TENANT_ID="<work-iq-tenant-id>"
+export DEM333_WORK_IQ_TENANT_ID="<work-iq-tenant-id>"
 export DEM333_WORK_IQ_CLIENT_ID="<entra-public-client-app-id>"
 export DEM333_MSAL_CACHE_B64="$(base64 < ~/.dem333/msal_token_cache.json | tr -d '\n')"
 
@@ -101,7 +101,7 @@ az cognitiveservices agent create \
     AZURE_AI_PROJECT_ENDPOINT="$AZURE_AI_PROJECT_ENDPOINT" \
     OPENAI_BASE_URL="$OPENAI_BASE_URL" \
     OPENAI_API_KEY="$OPENAI_API_KEY" \
-    AZURE_TENANT_ID="$AZURE_TENANT_ID" \
+    DEM333_WORK_IQ_TENANT_ID="$DEM333_WORK_IQ_TENANT_ID" \
     DEM333_WORK_IQ_CLIENT_ID="$DEM333_WORK_IQ_CLIENT_ID" \
     DEM333_MSAL_CACHE_B64="$DEM333_MSAL_CACHE_B64" \
     DEM333_DISABLE_INTERACTIVE_AUTH=true \

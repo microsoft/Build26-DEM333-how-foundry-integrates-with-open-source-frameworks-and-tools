@@ -133,7 +133,12 @@ def build_work_iq_mail_server_config(tenant_id: str, auth: httpx.Auth) -> dict[s
 
 def build_work_iq_mail_connection() -> dict[str, Any]:
     """Build authenticated MCP connection config for Work IQ Mail tools."""
-    tenant_id = _require_env("AZURE_TENANT_ID")
+    tenant_id = _first_env("DEM333_WORK_IQ_TENANT_ID", "WORK_IQ_TENANT_ID", "AZURE_TENANT_ID")
+    if not tenant_id:
+        raise RuntimeError(
+            "Missing Work IQ tenant ID. Set DEM333_WORK_IQ_TENANT_ID for Work IQ Mail. "
+            "AZURE_TENANT_ID remains supported as a local backwards-compatible fallback."
+        )
     client_id = _first_env("DEM333_WORK_IQ_CLIENT_ID", "WORK_IQ_CLIENT_ID", "AZURE_CLIENT_ID")
     auth = WorkIqBearerAuth(
         lambda: _acquire_work_iq_access_token(client_id=client_id, tenant_id=tenant_id)
@@ -152,7 +157,7 @@ def _format_work_iq_tool_error(error: Exception) -> str:
     )
 
 
-def configure_work_iq_tool_error_handling(tools: list[Any]) -> list[Any]:
+def configure_work_iq(tools: list[Any]) -> list[Any]:
     """Return MCP tools configured to surface recoverable tool errors to the agent."""
     for tool in tools:
         tool.handle_tool_error = _format_work_iq_tool_error
