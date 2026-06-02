@@ -81,7 +81,7 @@ return create_deep_agent(
 )
 ```
 
-**N:** The important point is that this is ordinary LangChain/LangGraph-style code. Most Foundry models expose OpenAI-compatible APIs, so LangChain can talk to a Foundry model deployment using the protocol it already understands. Changing the model target is configuration, not a rewrite.
+**N:** The key point is simple: this is normal LangChain and LangGraph code. Foundry gives us an OpenAI-compatible model endpoint, so we can change the model target without rewriting the agent.
 
 **F:** So in this case, LangChain owns the agent loop, and Foundry provides the model via the OpenAI-compatible protocol.
 
@@ -98,7 +98,7 @@ cd src
 uv run --env-file .env python main.py --agent base
 ```
 
-**N:** While it starts, notice that the framework loop is doing the work. We are not calling the hosted agent yet; the only production-facing dependency is the model behind `init_chat_model`.
+**N:** While it starts, notice this is still running locally. The agent loop is here in the terminal; the only cloud piece is the model endpoint behind `init_chat_model`.
 
 **Prompt card**
 
