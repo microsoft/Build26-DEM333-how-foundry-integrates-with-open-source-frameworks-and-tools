@@ -12,7 +12,6 @@ add the Playwright browser tool to the available tool list.
 
 from typing import Any
 from dem333.prompts.skills import SYSTEM_PROMPT
-from dem333.telemetry import configure_genai_semantic_conventions
 from dem333.tools.work_iq import (
     build_work_iq_mail_connection,
     configure_work_iq,
@@ -45,7 +44,7 @@ def get_mcp_client() -> MultiServerMCPClient:
 
 async def build_agent() -> CompiledStateGraph:
     """Build a deep learning agent with the provided MCP tools."""
-    model = configure_genai_semantic_conventions(init_chat_model("openai:gpt-5.2"))
+    model = init_chat_model("openai:gpt-5.2")
     tools = await get_tools()
     checkpointer = MemorySaver()
 
