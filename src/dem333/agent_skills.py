@@ -14,7 +14,7 @@ from typing import Any
 from dem333.prompts.skills import SYSTEM_PROMPT
 from dem333.tools.work_iq import (
     build_work_iq_mail_connection,
-    configure_work_iq_tool_error_handling,
+    configure_work_iq,
 )
 from deepagents import create_deep_agent
 from deepagents.backends import CompositeBackend, FilesystemBackend, StateBackend
@@ -33,7 +33,7 @@ async def get_tools() -> list[BaseTool]:
     mcp_client = get_mcp_client()
     mcp_tools = await mcp_client.get_tools()
 
-    return configure_work_iq_tool_error_handling(mcp_tools)
+    return configure_work_iq(mcp_tools)
 
 
 def get_mcp_client() -> MultiServerMCPClient:

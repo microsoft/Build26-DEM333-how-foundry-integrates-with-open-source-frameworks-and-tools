@@ -31,7 +31,7 @@ This project connects to:
 https://agent365.svc.cloud.microsoft/agents/tenants/{tenantId}/servers/mcp_MailTools
 ```
 
-The `tenantId` value comes from `AZURE_TENANT_ID`.
+The `tenantId` value comes from `DEM333_WORK_IQ_TENANT_ID` or `AZURE_TENANT_ID`.
 
 ### 2.1 Entra app registration
 
@@ -55,8 +55,10 @@ Record from the app Overview page:
 
 Use them as:
 
-- `AZURE_CLIENT_ID` = Application (client) ID
-- `AZURE_TENANT_ID` = Directory (tenant) ID
+- `DEM333_WORK_IQ_CLIENT_ID` = Application (client) ID
+- `DEM333_WORK_IQ_TENANT_ID` = Directory (tenant) ID
+- `AZURE_CLIENT_ID` = same Application (client) ID for local MSAL compatibility
+- `AZURE_TENANT_ID` = same Directory (tenant) ID for local MSAL compatibility
 
 Important:
 
@@ -92,8 +94,10 @@ Notes:
 Set before running:
 
 ```bash
-export AZURE_TENANT_ID="<your-tenant-guid>"
-export AZURE_CLIENT_ID="<your-app-client-guid>"
+export DEM333_WORK_IQ_TENANT_ID="<your-tenant-guid>"
+export DEM333_WORK_IQ_CLIENT_ID="<your-app-client-guid>"
+export AZURE_TENANT_ID="$DEM333_WORK_IQ_TENANT_ID"
+export AZURE_CLIENT_ID="$DEM333_WORK_IQ_CLIENT_ID"
 ```
 
 Optional:
@@ -140,7 +144,7 @@ Before running `uv run python main.py` from [src](../src), verify:
 
 1. `uv sync` completed.
 2. Node.js and `@playwright/cli` are installed and `playwright-cli --version` works.
-3. `AZURE_TENANT_ID` and `AZURE_CLIENT_ID` are set.
+3. `DEM333_WORK_IQ_TENANT_ID` / `DEM333_WORK_IQ_CLIENT_ID` are set, and for local MSAL compatibility `AZURE_TENANT_ID` / `AZURE_CLIENT_ID` match them.
 4. Entra app is configured as a public client with `http://localhost` redirect URI.
 5. Graph delegated permissions and tenant consent are in place.
 6. The signed-in user has an Exchange Online mailbox.
@@ -149,7 +153,7 @@ Before running `uv run python main.py` from [src](../src), verify:
 
 If mail tools fail:
 
-1. Verify `AZURE_TENANT_ID` and `AZURE_CLIENT_ID` values.
+1. Verify `DEM333_WORK_IQ_TENANT_ID` / `DEM333_WORK_IQ_CLIENT_ID` and matching `AZURE_TENANT_ID` / `AZURE_CLIENT_ID` values.
 2. If error `AADSTS7000218` appears, ensure the app is configured as a public client:
    - **Allow public client flows = Yes**
    - **Mobile/Desktop redirect URI includes `http://localhost`**

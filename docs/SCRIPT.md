@@ -17,7 +17,7 @@ We start with ordinary open-source agent code, progressively add real tools and 
 4. Playwright CLI shows the "sophisticated tool" pattern without bloating the model context.
 5. Foundry hosts the same agent behind the OpenAI-compatible Responses API.
 6. App Insights / OpenTelemetry shows the graph, model, tool calls, latency, and captured input/output.
-7. A2A lets Copilot CLI reach the hosted agent through a small local MCP bridge.
+7. A2A lets Copilot CLI discover and call the hosted agent through a small local A2A directory exposed as MCP.
 
 > **Conventions**
 >
@@ -26,17 +26,19 @@ We start with ordinary open-source agent code, progressively add real tools and 
 > - *(stage)* Action on screen or hand-off cue.
 > - **Prompt card:** Exact prompt to type during rehearsal.
 > - **Fallback:** What to say or do if a live service is slow.
+>
+> **Live-action cadence for Nagkumar:** before every action that can take time, say what you are about to do, do it on screen, then explain what the audience should watch for while it runs. Do not leave silent terminal or portal time.
 
 ---
 
 ## Current demo state to reflect during rehearsal
 
 - The main final agent is `src/dem333/agent.py`.
-- The hosted agent name is `dem333-openclaw-agent`.
+- The hosted agent name is `dem333-openclaw-agent-stitched`.
 - The hosted endpoint is enabled for both `responses` and `a2a`.
-- The currently rehearsed hosted deployment routes to version 6; verify before going on stage because this can change after redeploys.
+- The currently rehearsed hosted deployment routes to the latest validated version; verify before going on stage because this can change after redeploys.
 - Work IQ uses `DEM333_WORK_IQ_CLIENT_ID` / `WORK_IQ_CLIENT_ID`; do **not** put the Work IQ public-client app ID in `AZURE_CLIENT_ID` for hosted deployments.
-- The Copilot CLI integration is `dem333.copilot_a2a_bridge`.
+- The Copilot CLI integration is the generic A2A directory server in `dem333.a2a`.
 - A2A is not a wrapper around MCP. A2A is how another agent discovers and calls our hosted agent. The local MCP bridge exists only because Copilot CLI can consume MCP tools today.
 
 ---
@@ -51,7 +53,7 @@ We start with ordinary open-source agent code, progressively add real tools and 
 
 *(stage) Switch to a single slide: "Goal: build our own OpenClaw using only open-source pieces, then graduate it to Foundry."*
 
-**F:** And for that... we brought you an interesting setup. You've all seen *OpenClaw*, right? — this general-purpose agent that can browse the web, read your email, and whatnot. So today, we are going to **build our own OpenClaw, live**, using open-source frameworks and tools.
+**F:** And for that, we brought an interesting setup. You've seen agents like *OpenClaw*: they can browse the web, read email, and take action across tools. Today, we are going to **build our own OpenClaw-style agent, live**, using open-source frameworks and tools.
 
 *(stage) Slide: "Open-source agent code -> real tools -> hosted in Foundry -> observable -> callable by other agents.")*
 
@@ -65,7 +67,7 @@ We start with ordinary open-source agent code, progressively add real tools and 
 
 *(stage) Open `src/dem333/agent_base.py`.)*
 
-**N:** At the core, we need a model and an agent loop. [[FACUNDO COMMENT: YOU MAY NEED TO BRIEFLY MENTION WHAT'S AN AGENT LOOP]]. This file is intentionally small. The model comes from LangChain's `init_chat_model`, and the loop is built with `create_deep_agent`.
+**N:** At the core, we need a model and an agent loop. The agent loop is what keeps the agent moving: it asks the model for the next step, runs tools when needed, and uses each result to decide what happens next. This file is intentionally small. The model comes from LangChain's `init_chat_model`, and the loop is built with `create_deep_agent`.
 
 *(stage) Highlight the core lines.)*
 
@@ -79,11 +81,11 @@ return create_deep_agent(
 )
 ```
 
-**N:** The important point is that this is ordinary LangChain/LangGraph-style code. Foundry is not in this file. The model configuration comes from environment variables, so the same code can point at a Foundry model deployment without changing the agent loop. [[FACUNDO COMMENT: I THINK WE NEED TO MENTION THAT MOST MODELS IN FOUNDRY USES OPENAI COMPATIBLE APIS.]]
+**N:** The important point is that this is ordinary LangChain/LangGraph-style code. Most Foundry models expose OpenAI-compatible APIs, so LangChain can talk to a Foundry model deployment using the protocol it already understands. Changing the model target is configuration, not a rewrite.
 
 **F:** So in this case, LangChain owns the agent loop, and Foundry provides the model via the OpenAI-compatible protocol.
 
-**N:** Right. Now let's run it locally.
+**N:** Right. I'll run the smallest local agent first. It takes a few seconds to boot, so while it starts, watch for the DEM333 banner and notice that this is still just local Python - no hosted endpoint yet.
 
 ---
 
@@ -93,8 +95,10 @@ return create_deep_agent(
 
 ```bash
 cd src
-uv run python main.py --agent base
+uv run --env-file .env python main.py --agent base
 ```
+
+**N:** While it starts, notice that the framework loop is doing the work. We are not calling the hosted agent yet; the only production-facing dependency is the model behind `init_chat_model`.
 
 **Prompt card**
 
@@ -102,11 +106,11 @@ uv run python main.py --agent base
 Hello! In one sentence, tell me what you can help with.
 ```
 
-*(stage) The DEM333 banner appears, the agent replies with a generic assistant response.)*
+*(stage) Type the prompt. The DEM333 banner appears, the agent replies with a generic assistant response.)*
 
-**N:** This is useful, but it's still only a brain. If I ask it to read my email, it doesn't have any hands.
+**N:** This is useful, but it still cannot do work outside the model. To read email, it needs tools.
 
-**F:** Indeed. One of the things that make OpenClaw so popular is its ability to do things. What's the typical pattern to give access to tools?
+**F:** Right. One reason agents like OpenClaw are useful is that they can do things. What is the usual pattern for giving an agent tools?
 
 ---
 
@@ -129,26 +133,28 @@ return MultiServerMCPClient(connections)
 
 ```python
 mcp_tools = await mcp_client.get_tools()
-return configure_work_iq_tool_error_handling(mcp_tools)
+return configure_work_iq(mcp_tools)
 ```
 
 **F:** So you're saying I can take *any* LangGraph agent I already have, and just plug this server over the open protocol to give it access to Work IQ?
 
-**N:** Exactly. Let's show the difference.
+**N:** Exactly. I'll restart with the MCP-enabled agent now. The next request may pause while the tool connection is established, so while it runs, watch for tool discovery and the Work IQ / Mail MCP call rather than just the final text.
 
 *(stage) Restart with the MCP-enabled agent.)*
 
 ```bash
-uv run python main.py --agent mcp
+uv run --env-file .env python main.py --agent mcp
 ```
 
 **Prompt card - privacy-safe for rehearsal**
 
 ```text
-Check my inbox using Work IQ Mail. Do not include senders, subjects, body text, or personal data. Reply only in this format: INBOX_CHECK_OK=yes; MESSAGE_COUNT=<number>.
+check my email
 ```
 
 *(stage) The spinner shows Work IQ / Mail MCP tool calls. The final answer should be compact and privacy-safe.)*
+
+**N:** While that spinner is moving, watch the tool boundary. The agent discovered the mail tools at runtime and chose the right one. We are also keeping the output privacy-safe.
 
 **N:** Now the same local agent can call Microsoft 365 through MCP. The tool boundary is open and inspectable, and the agent still remains normal Python code.
 
@@ -158,24 +164,25 @@ Check my inbox using Work IQ Mail. Do not include senders, subjects, body text, 
 
 ## 5. Skills - teaching the agent how to use tools - 4 min
 
-**F:** This is great. So the agent now has hands — but we want more than that. Check my email doesn't save me time. For example, triaging my inbox does that. Do I need to ask it to open each message, read the content, etc?
+**F:** Great. The agent now has hands, but we want more than that. "Check my email" is useful, but "triage my inbox" saves time. Do I need to tell it every step?
 
 **N:** That's where Skills come in. A tool is a verb: "search messages." A Skill is a playbook: "when triaging inbox, pull minimal fields first, classify into categories, assign P0-P3 priority, avoid exposing private message content, and draft only when asked."
 
 *(stage) Open `src/dem333/skills/inbox-triage/SKILL.md`.)*
 
-**N:** A Skill is just a markdown file with a small frontmatter block. No special service. No proprietary schema. The agent reads the skill only when the prompt is relevant.
+**N:** A Skill is simple: a markdown playbook with a small frontmatter block. No special service. No proprietary schema. The agent reads it only when the prompt is relevant.
 
+**N:** Now I'll restart with the Skills-enabled agent. This can take a moment because the agent has to decide whether the prompt is relevant to a Skill, read that Skill, then use the same Work IQ tools under that guidance.
 *(stage) Restart with the skills-enabled agent.)*
 
 ```bash
-uv run python main.py --agent skills
+uv run --env-file .env python main.py --agent skills
 ```
 
 **Prompt card**
 
 ```text
-Triage my inbox. Use the inbox triage skill. Do not include senders, subjects, body text, or personal data. Return only priority counts P0-P3, category counts, and whether drafts are recommended.
+triage my inbox
 ```
 
 *(stage) Watch for the skill load notice and Work IQ tool calls.)*
@@ -195,6 +202,8 @@ backend = CompositeBackend(
 
 **N:** We mount the local `dem333/skills` folder into a virtual `/skills/` path. The agent can list and read the markdown when it needs guidance.
 
+**N:** Let's go back to the terminal. Watch for two things: first the Skill selection, then the Work IQ tool call. The point is simple: tools give capability, and Skills make the behavior repeatable.
+
 **F:** That's bold. Same model, same tools — but totally different behavior because of the reusable skill.
 
 **N:** That's the big point. Skills are a lightweight way to make agent behavior repeatable without turning every instruction into a massive system prompt.
@@ -212,26 +221,28 @@ backend = CompositeBackend(
 *(stage) Open final agent `src/dem333/agent.py` and highlight that both Work IQ tools and `playwright_cli` are returned.)*
 
 ```python
-return configure_work_iq_tool_error_handling(mcp_tools) + [playwright_cli]
+return configure_work_iq(mcp_tools) + [playwright_cli]
 ```
+
+**N:** I'll run the final local demo agent now and give it a browser task. Browser automation is intentionally slower than a chat-only response, so while it runs, I'll point out the skill/tool pattern instead of waiting silently.
 
 *(stage) Run the final local demo agent.)*
 
 ```bash
-uv run python main.py --agent demo
+uv run --env-file .env python main.py --agent demo
 ```
 
 **Prompt card - primary**
 
 ```text
-Open amazon.com and tell me the price of the first Microsoft-branded coffee cup you find. Do not sign in, add anything to cart, or attempt checkout. If the site blocks browsing, say it was blocked.
+Open amazon.com and tell me the price of the first Microsoft-branded coffee cup you find. Do not sign in, add anything to cart, or check out. If the site blocks browsing, say it was blocked.
 ```
 
 **F:** While this runs, I'm wondering - why did we use a different approach here compared to the MCP server from Work IQ?
 
-**N:** We could use an MCP server. However, that would create long instructions with the MCP server details that go to the context window. A more efficient approach these days is to use the command line. The Python tool schema stays tiny - one `args` string and an optional browser session. The page snapshots and command details only enter the context when the agent asks for them.
+**N:** We could use an MCP server, but browser work can create a large tool surface. Here the command line is simpler. The Python tool has one `args` string and an optional browser session. Snapshots and command details only enter the context when the agent asks for them.
 
-**F:** Got it. So this is not only easier to use for the model, it's also more token efficient. Ok, it's back now. 15 dollars for an Xbox mug? It better be nice!
+**F:** Got it. So it is easier for the model, and it is more token efficient. The result is back now, and the browser flow is the proof.
 
 **Prompt card - safer fallback**
 
@@ -241,6 +252,8 @@ Open https://build.microsoft.com/en-US/sessions/DEM333 and summarize the session
 
 *(stage) Spinner should show `skill: Web Browsing`, then `playwright_cli` commands such as `open`, `snapshot`, `type`, `press`, and `click`.)*
 
+**N:** While the browser steps run, notice that the model did not receive a giant browser API surface. It chose the Web Browsing Skill, then drove one Playwright CLI tool through a sequence of small commands and snapshots.
+
 **F:** The important part is not Amazon. The important part is that the agent selected the browser skill, used a single powerful tool safely, and kept the browser state across steps.
 
 **N:** Exactly. For live demos, public websites can block automation, so the fallback is the Build session page. The story still lands because the tool pattern is the same.
@@ -249,11 +262,11 @@ Open https://build.microsoft.com/en-US/sessions/DEM333 and summarize the session
 
 ## 7. From console to cloud - Foundry Responses API - 3 min
 
-**F:** Now, fair question from the audience: this is all running in a terminal, but nobody wants production users SSH-ing into your laptop. How can we take this to production?
+**F:** Now, fair question from the audience: this is running in a terminal, but production users are not going to use your laptop. How do we take this to production?
 
 *(stage) Open `src/server.py`.)*
 
-**N:** This is where Foundry can step in again. Foundry can host the same LangGraph agent and expose it behind the OpenAI-compatible Responses API. This file is the adapter layer. Notice that we still call the same `build_agent()` from `dem333.agent`.
+**N:** This is where Foundry steps in. Foundry hosts the same LangGraph agent and exposes it through an OpenAI-compatible Responses API. This file is the adapter layer. Notice that we still call the same `build_agent()` from `dem333.agent`.
 
 ```python
 app = ResponsesAgentServerHost(
@@ -275,7 +288,9 @@ host = ResponsesHostServer(
 
 **F:** If I'm reading this correctly, you are wrapping the agent in the protocol. So the same code path can run locally in the console or remotely, right?
 
-**N:** Correct. For the talk, the agent is already deployed as `dem333-openclaw-agent`. If we need to show the deployment path, the runbook is in `docs/HOSTED_AGENT_DEPLOYMENT.md`.
+**N:** Correct. For the talk, the agent is already deployed as `dem333-openclaw-agent-stitched`.
+
+**N:** I'll send the same triage prompt to the hosted agent next. Hosted calls can take a moment if the container is warming, so while it runs, I'll call out that this is the same `build_agent()` path now reached through the Responses API.
 
 *(stage) Optional: show the shape of the smoke test, not the full JSON response.)*
 
@@ -295,8 +310,12 @@ curl -sS -X POST \
 **Prompt card - hosted smoke**
 
 ```text
-In one sentence, explain why the Foundry Responses API can host this LangGraph agent without rewriting it.
+triage my inbox
 ```
+
+*(stage) Send the hosted smoke prompt through the endpoint or Foundry playground.)*
+
+**N:** While the request is in flight, the important adapter is `ResponsesHostServer`: OpenAI-compatible clients talk to the hosted endpoint, and our LangGraph agent still runs behind it.
 
 **Fallback:** If the live API is slow, switch to the Foundry playground for the same agent and say: "The protocol is the same; the playground is just another client of the hosted agent."
 
@@ -304,11 +323,11 @@ In one sentence, explain why the Foundry Responses API can host this LangGraph a
 
 ## 8. Observability - OpenTelemetry and App Insights - 3 min
 
-**F:** Ok. We got the agent to the cloud. The next production question is: can we see what it is doing?
+**F:** Okay. We got the agent to the cloud. The next production question is: can we see what it is doing?
 
 **N:** Yes. Foundry integrates with Application Insights and OpenTelemetry. The demo uses the Microsoft OpenTelemetry distro and GenAI semantic conventions, so we can inspect the LangGraph span, model calls, tool calls, latency, and captured input/output.
 
-*(stage) Open Foundry monitoring or App Insights traces for `dem333-openclaw-agent`.)*
+*(stage) Open Foundry monitoring or App Insights traces for `dem333-openclaw-agent-stitched`.)*
 
 **N:** In the trace, look for these beats:
 
@@ -326,36 +345,47 @@ export OTEL_SEMCONV_STABILITY_OPT_IN="gen_ai_latest_experimental"
 export AZURE_EXPERIMENTAL_ENABLE_GENAI_TRACING="true"
 ```
 
-**F:** And OpenTelemetry with semantic conventions means it's the same format across the industry, I can read it with any tool, no vendor lock-in, just data. Cool.
+**F:** And OpenTelemetry with semantic conventions means the data uses an industry format. We can read it with different tools. No lock-in, just telemetry.
+
+**N:** I'll generate one small request to create fresh telemetry. The trace view may lag by a few seconds, so while it runs, I'll explain the spans we expect to see.
 
 **Prompt card - generate trace traffic**
 
 ```text
-In one sentence, say this request is generating DEM333 OpenTelemetry input and output capture traffic.
+triage my inbox
 ```
+
+*(stage) Send the prompt through the hosted endpoint or Foundry playground, then switch back to the trace view.)*
+
+**N:** While it is running, watch for four spans or attributes: the LangGraph parent span, the model call, any tool calls, and captured input/output.
 
 **Fallback:** If the portal view is slow, use a prepared App Insights query result that shows recent `invoke_agent LangGraph` rows with non-empty input and output capture counts.
 
 ---
 
-## 9. A2A - calling the hosted agent from Copilot CLI - 2.5 min
+## 9. A2A - calling the hosted agent from Copilot CLI - 2 min
 
 **F:** Last question. They say that 2026 is all about agents working with other agents, can another agent call this one?
 
 **N:** Yes. Once the Foundry A2A endpoint is enabled, another A2A-compatible client can discover the agent card and send messages to the hosted agent.
 
-**N:** For Copilot CLI specifically, the current integration point is MCP tools. So we expose a tiny local MCP bridge that calls the Foundry A2A endpoint. That does **not** mean A2A is MCP. It means MCP is the local adapter Copilot CLI can load today.
+**N:** For Copilot CLI specifically, the current integration point is MCP tools. So we expose a tiny local A2A directory as an MCP server. Copilot can search configured agents, choose one, and then call it over A2A. That does **not** mean A2A is MCP. It means MCP is the local adapter Copilot CLI can load today.
 
-*(stage) Open `src/dem333/copilot_a2a_bridge.py` and highlight the tool.)*
+*(stage) Open `src/dem333/a2a/__main__.py` and highlight the tools.)*
 
 ```python
 @mcp.tool()
-async def ask_dem333_agent(message: str, ctx: Context) -> str:
-    """Ask the DEM333 Foundry hosted agent through its A2A endpoint."""
-    return await invoke_foundry_a2a(message, ctx)
+async def search_agent(query: str = "") -> list[dict[str, Any]]:
+    """Search the configured A2A agent directory."""
+
+@mcp.tool()
+async def call_agent_a2a(agent_id: str, message: str, ctx: Context) -> str:
+    """Call one configured A2A agent by ID. Use search_agent first."""
 ```
 
-*(stage) Direct bridge smoke test.)*
+**N:** I'll open Copilot CLI with the A2A directory loaded. Startup and tool registration can take a moment, so while it opens, watch for two tool names: `search_agent` and `call_agent_a2a`.
+
+*(stage) Then start Copilot CLI with the bridge.)*
 
 ```bash
 cd src
@@ -363,18 +393,12 @@ export FOUNDRY_A2A_URL="${AZURE_AI_PROJECT_ENDPOINT}/agents/${HOSTED_AGENT_NAME}
 export FOUNDRY_A2A_AGENT_CARD_PATH="agentCard/v0.3"
 export APPLICATIONINSIGHTS_CONNECTION_STRING="${APPLICATION_INSIGHTS_CONNECTION_STRING}"
 
-uv run python -m dem333.copilot_a2a_bridge --message "Reply exactly A2A bridge ready."
-```
-
-*(stage) Then start Copilot CLI with the bridge.)*
-
-```bash
 cat > /tmp/copilot-a2a-bridge.json <<JSON
 {
   "mcpServers": {
-    "copilot-a2a-bridge": {
+    "a2a-directory": {
       "command": "uv",
-      "args": ["--directory", "$PWD", "run", "python", "-m", "dem333.copilot_a2a_bridge"],
+      "args": ["--directory", "$PWD", "run", "--env-file", ".env", "python", "-m", "dem333.a2a"],
       "env": {
         "FOUNDRY_A2A_URL": "$FOUNDRY_A2A_URL",
         "FOUNDRY_A2A_AGENT_CARD_PATH": "agentCard/v0.3",
@@ -391,14 +415,18 @@ copilot --additional-mcp-config @/tmp/copilot-a2a-bridge.json --allow-all-tools 
 **Prompt card - inside Copilot CLI**
 
 ```text
-Use the ask_dem333_agent tool to ask: check my inbox using Work IQ Mail and return only priority/category labels and a total message count. Do not include senders, subjects, body text, or personal data.
+triage my inbox
 ```
 
-*(stage) Copilot CLI calls the MCP bridge; the bridge invokes the Foundry A2A endpoint; the hosted LangGraph agent uses Work IQ MCP and Skills; the answer appears back in Copilot CLI.)*
+*(stage) Copilot CLI calls `search_agent`, selects the configured DEM333 agent, calls `call_agent_a2a`, the directory invokes the Foundry A2A endpoint, the hosted LangGraph agent uses Work IQ MCP and Skills, and the answer appears back in Copilot CLI.)*
 
-**F:** Pause on what just happened. So Copilot CLI, a totally different agent runtime, called an MCP tool. That tool used A2A to reach our LangGraph agent hosted in Foundry, which then used Work IQ MCP server, applied a skill, and answered. **None of those pieces had to know about each other.** Impressive.
+**N:** While Copilot is waiting, trace the chain with me: Copilot CLI searches the local A2A directory, calls the selected agent through A2A, the hosted LangGraph agent runs, and that hosted agent can still use Work IQ MCP and Skills.
 
-**N:** And I'll give you something extra. The trace now follows that handoff. In App Insights, the local bridge span `invoke_agent dem333_foundry_a2a` and the hosted `invoke_agent LangGraph` span share the same operation ID, so we can explain both interop and observability in one screen.
+**F:** Pause on what just happened. Copilot CLI, a totally different agent runtime, searched an A2A directory exposed as MCP, selected a configured agent, and crossed into A2A. A2A reached our LangGraph agent hosted in Foundry, which then used Work IQ MCP server, applied a skill, and answered. **None of those pieces had to know about each other.** Impressive.
+
+**N:** And here is the extra payoff. The trace follows that handoff. In App Insights, the local directory span `invoke_agent dem333-openclaw-agent-stitched` and the hosted `invoke_agent LangGraph` span share the same operation ID, so we can explain interop and observability on one screen.
+
+**N:** That is the open-source integration story: framework, tools, skills, hosting, telemetry, and agent-to-agent interoperability.
 
 ---
 
@@ -426,8 +454,8 @@ Use the ask_dem333_agent tool to ask: check my inbox using Work IQ Mail and retu
 | 6. Playwright browser | 4:00 | 20:00 |
 | 7. Responses API on Foundry | 3:00 | 23:00 |
 | 8. OpenTelemetry | 3:00 | 26:00 |
-| 9. A2A from Copilot CLI | 2:30 | 28:30 |
-| 10. Wrap-up / Q&A buffer | 1:30 | 30:00 |
+| 9. A2A from Copilot CLI | 2:00 | 28:00 |
+| 10. Wrap-up / Q&A buffer | 2:00 | 30:00 |
 
 ---
 
@@ -438,14 +466,13 @@ Use these exact prompts when practicing so the telemetry and stage flow are pred
 | Demo beat | Prompt |
 |---|---|
 | Base console | `Hello! In one sentence, tell me what you can help with.` |
-| Work IQ MCP | `Check my inbox using Work IQ Mail. Do not include senders, subjects, body text, or personal data. Reply only in this format: INBOX_CHECK_OK=yes; MESSAGE_COUNT=<number>.` |
-| Inbox skill | `Triage my inbox. Use the inbox triage skill. Do not include senders, subjects, body text, or personal data. Return only priority counts P0-P3, category counts, and whether drafts are recommended.` |
+| Work IQ MCP | `check my email` |
+| Inbox skill | `triage my inbox` |
 | Browser primary | `Open amazon.com and tell me the price of the first Microsoft-branded coffee cup you find. Do not sign in, add anything to cart, or attempt checkout. If the site blocks browsing, say it was blocked.` |
 | Browser fallback | `Open https://build.microsoft.com/en-US/sessions/DEM333 and summarize the session in 3 bullets.` |
-| Hosted Responses | `In one sentence, explain why the Foundry Responses API can host this LangGraph agent without rewriting it.` |
-| Telemetry | `In one sentence, say this request is generating DEM333 OpenTelemetry input and output capture traffic.` |
-| Direct A2A | `Reply exactly A2A bridge ready.` |
-| Copilot CLI A2A | `Use the ask_dem333_agent tool to ask: check my inbox using Work IQ Mail and return only priority/category labels and a total message count. Do not include senders, subjects, body text, or personal data.` |
+| Hosted Responses | `triage my inbox` |
+| Telemetry | `triage my inbox` |
+| Copilot CLI A2A | `triage my inbox` |
 
 ---
 
@@ -453,18 +480,17 @@ Use these exact prompts when practicing so the telemetry and stage flow are pred
 
 - [ ] From repo root, run `cd src && uv sync` or `uv --directory src sync`; do not run `uv sync` from the repo root unless `pyproject.toml` has moved there.
 - [ ] If `uv` warns that the active `VIRTUAL_ENV` does not match `src/.venv`, either deactivate the root venv and use `src/.venv`, or intentionally target the active env with `uv --directory src sync --active`.
-- [ ] `cd src && uv run python main.py --agent base` boots clean.
-- [ ] `cd src && uv run python main.py --agent demo` boots clean.
+- [ ] `cd src && uv run --env-file .env python main.py --agent base` boots clean.
+- [ ] `cd src && uv run --env-file .env python main.py --agent demo` boots clean.
 - [ ] Azure CLI is logged into the tenant/subscription that owns the Foundry project.
 - [ ] Work IQ local auth is ready and no browser/device-code prompt appears during rehearsal.
 - [ ] Hosted Work IQ settings use `DEM333_WORK_IQ_CLIENT_ID` and **not** `AZURE_CLIENT_ID`.
 - [ ] `DEM333_MSAL_CACHE_B64` is current for hosted Work IQ, or direct-token smoke mode is intentionally being used.
-- [ ] Hosted agent `dem333-openclaw-agent` has `responses` and `a2a` protocols enabled.
+- [ ] Hosted agent `dem333-openclaw-agent-stitched` has `responses` and `a2a` protocols enabled.
 - [ ] Hosted traffic routes to the intended latest version before the talk.
 - [ ] App Insights receives recent `invoke_agent LangGraph` spans with `gen_ai.input.messages` and `gen_ai.output.messages`.
 - [ ] `FOUNDRY_A2A_URL` and `FOUNDRY_A2A_AGENT_CARD_PATH=agentCard/v0.3` are exported before running the bridge.
-- [ ] `uv run python -m dem333.copilot_a2a_bridge --message "Reply exactly A2A bridge ready."` succeeds.
-- [ ] Copilot CLI starts with `/tmp/copilot-a2a-bridge.json` and can see the `ask_dem333_agent` tool.
+- [ ] Copilot CLI starts with `/tmp/copilot-a2a-bridge.json`, can see `search_agent` and `call_agent_a2a`, and the real A2A inbox-triage prompt succeeds.
 - [ ] Browser fallback prompt is ready in case Amazon blocks automation.
 - [ ] Terminal font is at least 16pt, line wrapping is on, and secrets/tokens are not visible.
 
