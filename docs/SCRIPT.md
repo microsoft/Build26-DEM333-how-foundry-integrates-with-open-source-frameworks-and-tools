@@ -67,7 +67,7 @@ We start with ordinary open-source agent code, progressively add real tools and 
 
 *(stage) Open `src/dem333/agent_base.py`.)*
 
-**N:** At the core, we need a model and an agent loop. The agent loop is the runtime pattern that keeps taking the user's goal, asking the model what to do next, running tools when needed, and feeding results back until it can answer. This file is intentionally small. The model comes from LangChain's `init_chat_model`, and the loop is built with `create_deep_agent`.
+**N:** At the core, we need a model and an agent loop. The agent loop is what keeps the agent moving: it asks the model for the next step, runs tools when needed, and uses each result to decide what happens next. This file is intentionally small. The model comes from LangChain's `init_chat_model`, and the loop is built with `create_deep_agent`.
 
 *(stage) Highlight the core lines.)*
 
@@ -81,7 +81,7 @@ return create_deep_agent(
 )
 ```
 
-**N:** The important point is that this is ordinary LangChain/LangGraph-style code. Foundry is not in this file. Most models in Foundry are exposed through OpenAI-compatible APIs, so LangChain can talk to a Foundry model deployment through the same protocol it already understands. The target model is configuration, not a rewrite of the agent loop.
+**N:** The important point is that this is ordinary LangChain/LangGraph-style code. Most Foundry models expose OpenAI-compatible APIs, so LangChain can talk to a Foundry model deployment using the protocol it already understands. The model target is configuration, not a rewrite.
 
 **F:** So in this case, LangChain owns the agent loop, and Foundry provides the model via the OpenAI-compatible protocol.
 
