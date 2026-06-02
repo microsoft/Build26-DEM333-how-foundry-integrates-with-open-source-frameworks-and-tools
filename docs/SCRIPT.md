@@ -415,7 +415,7 @@ copilot --additional-mcp-config @/tmp/copilot-a2a-bridge.json --allow-all-tools 
 **Prompt card - inside Copilot CLI**
 
 ```text
-Search for an agent that can triage my inbox, then call it using A2A.
+triage my inbox
 ```
 
 *(stage) Copilot CLI calls `search_agent`, selects the configured DEM333 agent, calls `call_agent_a2a`, the directory invokes the Foundry A2A endpoint, the hosted LangGraph agent uses Work IQ MCP and Skills, and the answer appears back in Copilot CLI.)*
@@ -472,7 +472,7 @@ Use these exact prompts when practicing so the telemetry and stage flow are pred
 | Browser fallback | `Open https://build.microsoft.com/en-US/sessions/DEM333 and summarize the session in 3 bullets.` |
 | Hosted Responses | `triage my inbox` |
 | Telemetry | `triage my inbox` |
-| Copilot CLI A2A | `Search for an agent that can triage my inbox, then call it using A2A.` |
+| Copilot CLI A2A | `triage my inbox` |
 
 ---
 
