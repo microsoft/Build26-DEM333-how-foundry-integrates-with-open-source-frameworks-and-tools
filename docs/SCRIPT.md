@@ -149,7 +149,7 @@ uv run --env-file .env python main.py --agent mcp
 **Prompt card - privacy-safe for rehearsal**
 
 ```text
-Check my email. Do not show senders, subjects, or body text. Reply only with INBOX_CHECK_OK=yes and a message count.
+check my email
 ```
 
 *(stage) The spinner shows Work IQ / Mail MCP tool calls. The final answer should be compact and privacy-safe.)*
@@ -182,7 +182,7 @@ uv run --env-file .env python main.py --agent skills
 **Prompt card**
 
 ```text
-Triage my inbox. Use the inbox triage skill. Do not include senders, subjects, body text, or personal data. Return only priority counts P0-P3, category counts, and whether drafts are recommended.
+triage my inbox
 ```
 
 *(stage) Watch for the skill load notice and Work IQ tool calls.)*
@@ -310,7 +310,7 @@ curl -sS -X POST \
 **Prompt card - hosted smoke**
 
 ```text
-In one sentence, explain why the Foundry Responses API can host this LangGraph agent without rewriting it.
+triage my inbox
 ```
 
 *(stage) Send the hosted smoke prompt through the endpoint or Foundry playground.)*
@@ -352,7 +352,7 @@ export AZURE_EXPERIMENTAL_ENABLE_GENAI_TRACING="true"
 **Prompt card - generate trace traffic**
 
 ```text
-In one sentence, say this request is generating DEM333 OpenTelemetry input and output capture traffic.
+triage my inbox
 ```
 
 *(stage) Send the prompt through the hosted endpoint or Foundry playground, then switch back to the trace view.)*
@@ -415,7 +415,7 @@ copilot --additional-mcp-config @/tmp/copilot-a2a-bridge.json --allow-all-tools 
 **Prompt card - inside Copilot CLI**
 
 ```text
-Search for an agent that can triage inbox messages, then call it using A2A. Return only priority/category labels and a total message count. Do not include senders, subjects, body text, or personal data.
+Search for an agent that can triage my inbox, then call it using A2A.
 ```
 
 *(stage) Copilot CLI calls `search_agent`, selects the configured DEM333 agent, calls `call_agent_a2a`, the directory invokes the Foundry A2A endpoint, the hosted LangGraph agent uses Work IQ MCP and Skills, and the answer appears back in Copilot CLI.)*
@@ -466,13 +466,13 @@ Use these exact prompts when practicing so the telemetry and stage flow are pred
 | Demo beat | Prompt |
 |---|---|
 | Base console | `Hello! In one sentence, tell me what you can help with.` |
-| Work IQ MCP | `Check my email. Do not show senders, subjects, or body text. Reply only with INBOX_CHECK_OK=yes and a message count.` |
-| Inbox skill | `Triage my inbox. Use the inbox triage skill. Do not include senders, subjects, body text, or personal data. Return only priority counts P0-P3, category counts, and whether drafts are recommended.` |
+| Work IQ MCP | `check my email` |
+| Inbox skill | `triage my inbox` |
 | Browser primary | `Open amazon.com and tell me the price of the first Microsoft-branded coffee cup you find. Do not sign in, add anything to cart, or attempt checkout. If the site blocks browsing, say it was blocked.` |
 | Browser fallback | `Open https://build.microsoft.com/en-US/sessions/DEM333 and summarize the session in 3 bullets.` |
-| Hosted Responses | `In one sentence, explain why the Foundry Responses API can host this LangGraph agent without rewriting it.` |
-| Telemetry | `In one sentence, say this request is generating DEM333 OpenTelemetry input and output capture traffic.` |
-| Copilot CLI A2A | `Search for an agent that can triage inbox messages, then call it using A2A. Return only priority/category labels and a total message count. Do not include senders, subjects, body text, or personal data.` |
+| Hosted Responses | `triage my inbox` |
+| Telemetry | `triage my inbox` |
+| Copilot CLI A2A | `Search for an agent that can triage my inbox, then call it using A2A.` |
 
 ---
 
