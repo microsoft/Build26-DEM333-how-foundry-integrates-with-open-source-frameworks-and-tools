@@ -10,7 +10,7 @@ from langchain_azure_ai._api.base import ExperimentalWarning
 warnings.filterwarnings("ignore", category=LangChainBetaWarning)
 warnings.filterwarnings("ignore", category=ExperimentalWarning)
 
-from dem333.utils import inspect_loaded_skills
+from myclaw.utils import inspect_loaded_skills
 from langchain_core.messages import HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 from rich.console import Console, Group
@@ -373,14 +373,7 @@ async def _run_chat_loop(agent, skill_names: list[str] | None = None) -> None:
 
 def _resolve_agent_builder(agent_name: str) -> Callable[[], Awaitable[CompiledStateGraph]]:
     """Import only the selected teaching step so earlier steps stay dependency-light."""
-    if agent_name == "base":
-        from dem333.agent_base import build_agent
-    elif agent_name == "mcp":
-        from dem333.agent_mcp import build_agent
-    elif agent_name == "skills":
-        from dem333.agent_skills import build_agent
-    else:
-        from dem333.agent import build_agent
+    from myclaw.agent import build_agent
 
     return build_agent
 

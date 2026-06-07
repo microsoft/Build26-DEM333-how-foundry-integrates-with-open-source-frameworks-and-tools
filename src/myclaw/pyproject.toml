@@ -1,17 +1,15 @@
 [project]
-name = "dem333"
+name = "dem333-agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "DEM333 Build Agent for Microsoft Foundry and open-source framework integration demos"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "a2a-sdk==1.0.2",
-    "azure-ai-agentserver-responses>=1.0.0b7",
-    "azure-monitor-opentelemetry-exporter>=1.0.0b1",
     "deepagents>=0.6.5",
     "httpx==0.28.1",
     "langchain>=1.3.2",
-    "langchain-azure-ai>=1.2.5",
+    "langchain-azure-ai[opentelemetry,hosting]>=1.2.5",
     "langchain-mcp-adapters>=0.1.0",
     "langchain-openai>=1.2.2",
     "mcp>=1.24.0",

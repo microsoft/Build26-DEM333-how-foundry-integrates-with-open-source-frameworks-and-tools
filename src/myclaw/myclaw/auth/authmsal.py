@@ -77,9 +77,9 @@ def _save_token_cache(token_cache: msal.SerializableTokenCache, cache_path: Path
 
 
 def _interactive_auth_enabled() -> bool:
-    if _truthy(os.getenv("DEM333_DISABLE_INTERACTIVE_AUTH")):
+    if _truthy(os.getenv("WORK_IQ_DISABLE_INTERACTIVE_AUTH")):
         return False
-    if _truthy(os.getenv("DEM333_ENABLE_INTERACTIVE_AUTH")):
+    if _truthy(os.getenv("WORK_IQ_ENABLE_INTERACTIVE_AUTH")):
         return True
     return sys.stdin.isatty()
 

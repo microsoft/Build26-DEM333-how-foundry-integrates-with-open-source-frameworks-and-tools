@@ -26,4 +26,4 @@ __pycache__/
 *.pyd
 */.venv/
 *.egg-info
-*/.playwright-cli/
+.playwright-cli/
