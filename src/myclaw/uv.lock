@@ -168,6 +168,18 @@ wheels = [
 ]
 
 [[package]]
+name = "azure-ai-agentserver-invocations"
+version = "1.0.0b4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "azure-ai-agentserver-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/85/8a/1ec5e3212d0fc6ffd11dbbfef252a1f80e3305993f57069654abffa3ac0a/azure_ai_agentserver_invocations-1.0.0b4.tar.gz", hash = "sha256:4d78748e36b6120fd24161baea6c54de9687b3fe3f607a97766dab30e4f810ed", size = 56727, upload-time = "2026-05-21T22:45:25.581Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6b/c7/882e349459a0e3bfe63ca681f722cc7d5807df5e4aa348d879e3dc05d4c0/azure_ai_agentserver_invocations-1.0.0b4-py3-none-any.whl", hash = "sha256:3da2712b4be44afa8f3f25f00f5268588edcddaee08686e40b3589fafa71cdbe", size = 18782, upload-time = "2026-05-21T22:45:26.547Z" },
+]
+
+[[package]]
 name = "azure-ai-agentserver-responses"
 version = "1.0.0b7"
 source = { registry = "https://pypi.org/simple" }
@@ -275,6 +287,30 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c5/0e/3a63efb48aa4a5ae2cfca61ee152fbcb668092134d3eb8bfda472dd5c617/azure_identity-1.25.3.tar.gz", hash = "sha256:ab23c0d63015f50b630ef6c6cf395e7262f439ce06e5d07a64e874c724f8d9e6", size = 286304, upload-time = "2026-03-13T01:12:20.892Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/49/9a/417b3a533e01953a7c618884df2cb05a71e7b68bdbce4fbdb62349d2a2e8/azure_identity-1.25.3-py3-none-any.whl", hash = "sha256:f4d0b956a8146f30333e071374171f3cfa7bdb8073adb8c3814b65567aa7447c", size = 192138, upload-time = "2026-03-13T01:12:22.951Z" },
+]
+
+[[package]]
+name = "azure-monitor-opentelemetry"
+version = "1.8.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "azure-core" },
+    { name = "azure-core-tracing-opentelemetry" },
+    { name = "azure-monitor-opentelemetry-exporter" },
+    { name = "opentelemetry-instrumentation-django" },
+    { name = "opentelemetry-instrumentation-fastapi" },
+    { name = "opentelemetry-instrumentation-flask" },
+    { name = "opentelemetry-instrumentation-logging" },
+    { name = "opentelemetry-instrumentation-psycopg2" },
+    { name = "opentelemetry-instrumentation-requests" },
+    { name = "opentelemetry-instrumentation-urllib" },
+    { name = "opentelemetry-instrumentation-urllib3" },
+    { name = "opentelemetry-resource-detector-azure" },
+    { name = "opentelemetry-sdk" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2d/9e/3e63aa6cf8a46d06090b6f0046da6a59c470ffaf9968430867fa4a3c2eac/azure_monitor_opentelemetry-1.8.8.tar.gz", hash = "sha256:c6478cac82939230e9af1004b0a147e39b9046a564f3811d65241797f2f9d41d", size = 77532, upload-time = "2026-05-14T16:21:44.796Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ca/31/eb0cbb6771b222fddc520c30a7a8005e8537470131910c089ece37c82655/azure_monitor_opentelemetry-1.8.8-py3-none-any.whl", hash = "sha256:8c0d3095785ca8297d727181bef8dc0341f318fae750ad63af47722bbc56096f", size = 41371, upload-time = "2026-05-14T16:21:45.949Z" },
 ]
 
 [[package]]
@@ -508,17 +544,15 @@ wheels = [
 ]
 
 [[package]]
-name = "dem333"
+name = "dem333-agent"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "a2a-sdk" },
-    { name = "azure-ai-agentserver-responses" },
-    { name = "azure-monitor-opentelemetry-exporter" },
     { name = "deepagents" },
     { name = "httpx" },
     { name = "langchain" },
-    { name = "langchain-azure-ai" },
+    { name = "langchain-azure-ai", extra = ["hosting", "opentelemetry"] },
     { name = "langchain-mcp-adapters" },
     { name = "langchain-openai" },
     { name = "mcp" },
@@ -530,12 +564,10 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "a2a-sdk", specifier = "==1.0.2" },
-    { name = "azure-ai-agentserver-responses", specifier = ">=1.0.0b7" },
-    { name = "azure-monitor-opentelemetry-exporter", specifier = ">=1.0.0b1" },
     { name = "deepagents", specifier = ">=0.6.5" },
     { name = "httpx", specifier = "==0.28.1" },
     { name = "langchain", specifier = ">=1.3.2" },
-    { name = "langchain-azure-ai", specifier = ">=1.2.5" },
+    { name = "langchain-azure-ai", extras = ["opentelemetry", "hosting"], specifier = ">=1.2.5" },
     { name = "langchain-mcp-adapters", specifier = ">=0.1.0" },
     { name = "langchain-openai", specifier = ">=1.2.2" },
     { name = "mcp", specifier = ">=1.24.0" },
@@ -942,6 +974,23 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c8/42/65c3dc3841e3bf9295c197d52059e61e6dc147411731c73bb5259a44b5a6/langchain_azure_ai-1.2.5.tar.gz", hash = "sha256:4377c01c1eb30ba5e2fdfd24536f6a511691afd09671cb5f91078044d7ea6854", size = 215760, upload-time = "2026-05-30T00:02:59.513Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4f/e5/58f15bef32ccc0af806f85800f0d715d5cad3c7fb0e4037d8d7773775f8c/langchain_azure_ai-1.2.5-py3-none-any.whl", hash = "sha256:09d99558a55a89c70cfc1f01dd058776a1b0a1bd3f2a924c480355fd184f3c4d", size = 270766, upload-time = "2026-05-30T00:02:58.172Z" },
+]
+
+[package.optional-dependencies]
+hosting = [
+    { name = "azure-ai-agentserver-core" },
+    { name = "azure-ai-agentserver-invocations" },
+    { name = "azure-ai-agentserver-responses" },
+    { name = "starlette" },
+]
+opentelemetry = [
+    { name = "azure-monitor-opentelemetry" },
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-instrumentation-threading" },
+    { name = "opentelemetry-semantic-conventions" },
+    { name = "opentelemetry-semantic-conventions-ai" },
+    { name = "wrapt" },
 ]
 
 [[package]]
@@ -1547,6 +1596,20 @@ wheels = [
 ]
 
 [[package]]
+name = "opentelemetry-instrumentation-threading"
+version = "0.61b0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-instrumentation" },
+    { name = "wrapt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/12/8f/8dedba66100cda58af057926449a5e58e6c008bec02bc2746c03c3d85dcd/opentelemetry_instrumentation_threading-0.61b0.tar.gz", hash = "sha256:38e0263c692d15a7a458b3fa0286d29290448fa4ac4c63045edac438c6113433", size = 9163, upload-time = "2026-03-04T14:20:50.546Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/77/c06d960aede1a014812aa4fafde0ae546d790f46416fbeafa2b32095aae3/opentelemetry_instrumentation_threading-0.61b0-py3-none-any.whl", hash = "sha256:735f4a1dc964202fc8aff475efc12bb64e6566f22dff52d5cb5de864b3fe1a70", size = 9337, upload-time = "2026-03-04T14:19:57.983Z" },
+]
+
+[[package]]
 name = "opentelemetry-instrumentation-urllib"
 version = "0.61b0"
 source = { registry = "https://pypi.org/simple" }
@@ -1641,6 +1704,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/6d/c0/4ae7973f3c2cfd2b6e321f1675626f0dab0a97027cc7a297474c9c8f3d04/opentelemetry_semantic_conventions-0.61b0.tar.gz", hash = "sha256:072f65473c5d7c6dc0355b27d6c9d1a679d63b6d4b4b16a9773062cb7e31192a", size = 145755, upload-time = "2026-03-04T14:17:32.664Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b2/37/cc6a55e448deaa9b27377d087da8615a3416d8ad523d5960b78dbeadd02a/opentelemetry_semantic_conventions-0.61b0-py3-none-any.whl", hash = "sha256:fa530a96be229795f8cef353739b618148b0fe2b4b3f005e60e262926c4d38e2", size = 231621, upload-time = "2026-03-04T14:17:19.33Z" },
+]
+
+[[package]]
+name = "opentelemetry-semantic-conventions-ai"
+version = "0.4.16"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "opentelemetry-sdk" },
+    { name = "opentelemetry-semantic-conventions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/37/44/fda3c60e77548224ffd86b62aab5a58534e1d32f74d2ccd50ef58aade8d3/opentelemetry_semantic_conventions_ai-0.4.16.tar.gz", hash = "sha256:572eb878d8b81e50f1e53d2a5c1b441e7d34918ee01c846ff62485204d660c22", size = 19071, upload-time = "2026-03-19T15:29:35.357Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/db/98/e8bf804f2351603b508abaa624096ba279f1d62c3104e7020b45ae938d54/opentelemetry_semantic_conventions_ai-0.4.16-py3-none-any.whl", hash = "sha256:d5ddd0df387b969da82e3e0a8b7415e91d2fc7ce13de7efc2690a7939932b2e0", size = 6495, upload-time = "2026-03-19T15:29:33.974Z" },
 ]
 
 [[package]]

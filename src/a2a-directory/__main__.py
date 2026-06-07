@@ -5,7 +5,7 @@ from typing import Any
 
 from mcp.server.fastmcp import Context, FastMCP
 
-from .client import configure_local_tracing, flush_local_tracing, get_agent_card, invoke_a2a_agent
+from a2a_directory.client import configure_local_tracing, flush_local_tracing, get_agent_card, invoke_a2a_agent
 from .registry import A2AAgent, find_agent, load_agents
 
 

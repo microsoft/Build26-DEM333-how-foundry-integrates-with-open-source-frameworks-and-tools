@@ -1,11 +1,11 @@
 from typing import Any
 
-from dem333.prompts.prompt import SYSTEM_PROMPT
-from dem333.tools.work_iq import (
+from myclaw.prompts.prompt import SYSTEM_PROMPT
+from myclaw.tools.work_iq import (
     build_work_iq_mail_connection,
     configure_work_iq,
 )
-from dem333.tools.browser import playwright_cli
+from myclaw.tools.browser import playwright_cli
 from deepagents import create_deep_agent
 from deepagents.backends import CompositeBackend, FilesystemBackend, StateBackend
 
@@ -41,7 +41,7 @@ async def build_agent() -> CompiledStateGraph:
     backend = CompositeBackend(
         default=StateBackend(),
         routes={
-            "/skills/": FilesystemBackend(root_dir="dem333/skills", virtual_mode=True),
+            "/skills/": FilesystemBackend(root_dir="myclaw/skills", virtual_mode=True),
         },
     )
     

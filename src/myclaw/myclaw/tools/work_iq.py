@@ -1,3 +1,4 @@
+import httpx
 import base64
 import binascii
 import json
@@ -6,16 +7,7 @@ import time
 from collections.abc import Callable, Iterator
 from typing import Any
 
-import httpx
-
-from dem333.authmsal import acquire_user_access_token
-
-
-def _require_env(name: str) -> str:
-    value = os.getenv(name)
-    if value:
-        return value
-    raise RuntimeError(f"Missing required environment variable: {name}")
+from myclaw.auth.authmsal import acquire_user_access_token
 
 
 def _first_env(*names: str) -> str | None:
@@ -133,13 +125,13 @@ def build_work_iq_mail_server_config(tenant_id: str, auth: httpx.Auth) -> dict[s
 
 def build_work_iq_mail_connection() -> dict[str, Any]:
     """Build authenticated MCP connection config for Work IQ Mail tools."""
-    tenant_id = _first_env("DEM333_WORK_IQ_TENANT_ID", "WORK_IQ_TENANT_ID", "AZURE_TENANT_ID")
+    tenant_id = _first_env("WORK_IQ_TENANT_ID", "AZURE_TENANT_ID")
     if not tenant_id:
         raise RuntimeError(
-            "Missing Work IQ tenant ID. Set DEM333_WORK_IQ_TENANT_ID for Work IQ Mail. "
+            "Missing Work IQ tenant ID. Set WORK_IQ_TENANT_ID for Work IQ Mail. "
             "AZURE_TENANT_ID remains supported as a local backwards-compatible fallback."
         )
-    client_id = _first_env("DEM333_WORK_IQ_CLIENT_ID", "WORK_IQ_CLIENT_ID", "AZURE_CLIENT_ID")
+    client_id = _first_env("WORK_IQ_CLIENT_ID", "AZURE_CLIENT_ID")
     auth = WorkIqBearerAuth(
         lambda: _acquire_work_iq_access_token(client_id=client_id, tenant_id=tenant_id)
     )
