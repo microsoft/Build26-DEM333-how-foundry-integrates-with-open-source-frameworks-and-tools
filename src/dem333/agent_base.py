@@ -26,4 +26,3 @@ async def build_agent() -> CompiledStateGraph:
         system_prompt=SYSTEM_PROMPT,
         checkpointer=MemorySaver(),
     )
-
