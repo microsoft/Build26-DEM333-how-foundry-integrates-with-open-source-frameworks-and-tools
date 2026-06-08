@@ -1,0 +1,8 @@
+[
+  {
+    "id": "dem333-openclaw-agent",
+    "name": "dem333-openclaw-agent",
+    "base_url": "<project-endpoint>/agents/dem333-openclaw-agent/endpoint/protocols/a2a",
+    "agent_card_path": "agentCard/v0.3"
+  }
+]
