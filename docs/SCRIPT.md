@@ -90,7 +90,7 @@ return MultiServerMCPClient(connections)
 
 ```python
 mcp_tools = await mcp_client.get_tools()
-return configure_work_iq(mcp_tools)
+return configure_mcp_tool_error_handling(mcp_tools)
 ```
 
 **F:** So you're saying I can take *any* LangGraph agent I already have, and just plug this server over the open protocol to give it access to Work IQ?
@@ -167,7 +167,7 @@ Our get_tools method now has an added playright_cli tool.
 *(stage) Open final agent `src/dem333/agent.py` and highlight that both Work IQ tools and `playwright_cli` are returned.)*
 
 ```python
-return configure_work_iq(mcp_tools) + [playwright_cli]
+return configure_mcp_tool_error_handling(mcp_tools) + [playwright_cli]
 ```
 
 **N:** Let's run it again with tool and give it a task, let's say, find a nice coffee cup on amazon.com
@@ -325,7 +325,7 @@ Use these exact prompts when practicing so the telemetry and stage flow are pred
 - [ ] `cd src && uv run --env-file .env python main.py --agent demo` boots clean.
 - [ ] Azure CLI is logged into the tenant/subscription that owns the Foundry project.
 - [ ] Work IQ local auth is ready and no browser/device-code prompt appears during rehearsal.
-- [ ] Hosted Work IQ settings use `DEM333_WORK_IQ_CLIENT_ID` and **not** `AZURE_CLIENT_ID`.
+- [ ] Hosted Work IQ settings use `WORK_IQ_CLIENT_ID` and **not** `AZURE_CLIENT_ID`.
 - [ ] `DEM333_MSAL_CACHE_B64` is current for hosted Work IQ, or direct-token smoke mode is intentionally being used.
 - [ ] Hosted agent `dem333-openclaw-agent-stitched` has `responses` and `a2a` protocols enabled.
 - [ ] Hosted traffic routes to the intended latest version before the talk.

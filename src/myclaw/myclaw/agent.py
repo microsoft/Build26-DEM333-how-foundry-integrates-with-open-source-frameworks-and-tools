@@ -1,10 +1,8 @@
 from typing import Any
 
 from myclaw.prompts.prompt import SYSTEM_PROMPT
-from myclaw.tools.work_iq import (
-    build_work_iq_mail_connection,
-    configure_work_iq,
-)
+from myclaw.tools.work_iq import build_work_iq_mail_connection
+from myclaw.tools.mcp import configure_mcp_tool_error_handling
 from myclaw.tools.browser import playwright_cli
 from deepagents import create_deep_agent
 from deepagents.backends import CompositeBackend, FilesystemBackend, StateBackend
@@ -20,20 +18,26 @@ SKILL_SOURCES = ["/skills/"]
 
 async def get_tools() -> list[BaseTool]:
     """Get the list of available tools."""
-    mcp_client = get_mcp_client()
+    
+    mcp_client = get_mcp_servers()
     mcp_tools = await mcp_client.get_tools()
+    mcp_tools = configure_mcp_tool_error_handling(mcp_tools)
 
-    return configure_work_iq(mcp_tools) + [playwright_cli]
+    return mcp_tools + [playwright_cli]
 
 
-def get_mcp_client() -> MultiServerMCPClient:
-    """Create a configured MCP client for the Office 365 Mail tools server."""
-    connections: dict[str, Any] = {"mail": build_work_iq_mail_connection()}
+def get_mcp_servers() -> MultiServerMCPClient:
+    """Gets the MCP servers to be used by the agent."""
+    
+    connections: dict[str, Any] = {
+        "mail": build_work_iq_mail_connection()
+    }
     return MultiServerMCPClient(connections)
 
 
 async def build_agent() -> CompiledStateGraph:
     """Build a deep learning agent with the provided MCP tools."""
+    
     model = init_chat_model("openai:gpt-5.2")
     tools = await get_tools()
     checkpointer = MemorySaver()

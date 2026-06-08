@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 from deepagents.middleware.skills import SkillsMiddleware, _alist_skills_with_errors
@@ -14,6 +15,12 @@ def _get_middleware(agent: CompiledStateGraph, mw_class: type) -> Any | None:
                 return owner
     return None
 
+def first_env(*names: str) -> str | None:
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    return None
 
 async def inspect_loaded_skills(agent: CompiledStateGraph) -> tuple[list[str], list[str]]:
     """Inspect the skills loaded by the agent.

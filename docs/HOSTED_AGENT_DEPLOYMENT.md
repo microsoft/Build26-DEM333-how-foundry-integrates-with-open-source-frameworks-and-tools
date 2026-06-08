@@ -32,7 +32,7 @@ export HOSTED_AGENT_NAME="dem333-openclaw-agent"
 export APPLICATION_INSIGHTS_NAME="<app-insights-name>"
 
 export DEM333_WORK_IQ_TENANT_ID="<work-iq-tenant-id>"
-export DEM333_WORK_IQ_CLIENT_ID="<entra-public-client-app-id>"
+export WORK_IQ_CLIENT_ID="<entra-public-client-app-id>"
 export DEM333_MSAL_CACHE_B64="$(base64 < ~/.dem333/msal_token_cache.json | tr -d '\n')"
 
 export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT="SPAN_AND_EVENT"
@@ -46,7 +46,7 @@ export OPENAI_API_KEY="<openai-compatible-api-key>"
 
 Before the hosted demo, sign in locally once so `~/.dem333/msal_token_cache.json` exists, then pass the serialized cache as a secret runtime environment variable. Hosted containers cannot complete an interactive browser login during readiness. For a short-lived smoke test, you can instead set `DEM333_WORK_IQ_ACCESS_TOKEN` to a Work IQ access token for `https://agent365.svc.cloud.microsoft`, but that direct-token mode only lasts until the token expires.
 
-Do not use `AZURE_CLIENT_ID` for the Work IQ app in hosted deployments. The hosted-agent runtime uses `AZURE_CLIENT_ID` to select its managed identity for Foundry storage, so setting it to the Work IQ public app ID breaks response persistence. Use `DEM333_WORK_IQ_CLIENT_ID` instead, or omit it when using `DEM333_WORK_IQ_ACCESS_TOKEN`.
+Do not use `AZURE_CLIENT_ID` for the Work IQ app in hosted deployments. The hosted-agent runtime uses `AZURE_CLIENT_ID` to select its managed identity for Foundry storage, so setting it to the Work IQ public app ID breaks response persistence. Use `WORK_IQ_CLIENT_ID` instead, or omit it when using `DEM333_WORK_IQ_ACCESS_TOKEN`.
 
 Then move to the container build context:
 
@@ -102,7 +102,7 @@ az cognitiveservices agent create \
     OPENAI_BASE_URL="$OPENAI_BASE_URL" \
     OPENAI_API_KEY="$OPENAI_API_KEY" \
     DEM333_WORK_IQ_TENANT_ID="$DEM333_WORK_IQ_TENANT_ID" \
-    DEM333_WORK_IQ_CLIENT_ID="$DEM333_WORK_IQ_CLIENT_ID" \
+    WORK_IQ_CLIENT_ID="$WORK_IQ_CLIENT_ID" \
     DEM333_MSAL_CACHE_B64="$DEM333_MSAL_CACHE_B64" \
     DEM333_DISABLE_INTERACTIVE_AUTH=true \
     DEM333_DISABLE_CACHE_WRITE=true \
