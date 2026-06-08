@@ -23,8 +23,8 @@ COPY pyproject.toml uv.lock ./
 RUN touch README.md
 RUN uv sync --locked --no-dev
 
-COPY dem333 ./dem333
-COPY main.py server.py ./
+COPY myclaw ./myclaw
+COPY server.py ./
 
 EXPOSE 8088
 
