@@ -23,27 +23,55 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generic A2A directory MCP server for Copilot CLI."
     )
-    parser.add_argument(
-        "--search",
-        metavar="QUERY",
-        help="Search configured A2A agents and print matching entries.",
+    subparsers = parser.add_subparsers(dest="command")
+
+    search_parser = subparsers.add_parser(
+        "search", help="Search configured A2A agents and print matching entries."
     )
-    parser.add_argument(
+    search_parser.add_argument("query", help="Search query for the agent directory.")
+
+    call_parser = subparsers.add_parser(
+        "call", help="Invoke an A2A agent once and print the response."
+    )
+    call_parser.add_argument(
         "--agent-id",
         default=None,
-        help="Configured A2A agent id to call when --message is provided.",
+        help="Configured A2A agent id to call (default: first configured agent).",
     )
-    parser.add_argument(
+    call_parser.add_argument(
         "--message",
-        help="Invoke an A2A agent once and print the response instead of starting MCP.",
+        required=True,
+        help="Message to send to the A2A agent.",
     )
+
+    serve_parser = subparsers.add_parser(
+        "serve", help="Start the MCP server (default when no command is given)."
+    )
+    serve_parser.add_argument(
+        "--protocol",
+        choices=("stdio", "http", "sse"),
+        default="stdio",
+        help="Transport for the MCP server (default: stdio).",
+    )
+    serve_parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Bind host for the http/sse transports (default: 127.0.0.1).",
+    )
+    serve_parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Bind port for the http/sse transports (default: 8000).",
+    )
+
     args = parser.parse_args()
 
-    if args.search is not None:
-        asyncio.run(_direct_search(args.search))
+    if args.command == "search":
+        asyncio.run(_direct_search(args.query))
         return
 
-    if args.message:
+    if args.command == "call":
         agents = load_agents()
         agent_id = args.agent_id or agents[0].id
         try:
@@ -55,7 +83,10 @@ def main() -> None:
             flush_local_tracing()
         return
 
-    run()
+    protocol = getattr(args, "protocol", "stdio")
+    host = getattr(args, "host", "127.0.0.1")
+    port = getattr(args, "port", 8000)
+    run(protocol=protocol, host=host, port=port)
 
 
 if __name__ == "__main__":

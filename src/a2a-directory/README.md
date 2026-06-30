@@ -18,22 +18,24 @@ cd src/a2a-directory
 uv sync
 ```
 
-Run as an MCP server:
+Run as an MCP server (stdio by default):
 
 ```bash
 uv run python -m a2a-directory
+# or explicitly, with HTTP transport:
+uv run python -m a2a-directory serve --protocol http --host 127.0.0.1 --port 8000
 ```
 
 Search agents from the command line:
 
 ```bash
-uv run python -m a2a-directory --search "email triage"
+uv run python -m a2a-directory search "email triage"
 ```
 
 Invoke a configured agent directly:
 
 ```bash
-uv run python -m a2a-directory --agent-id my-agent --message "Summarize this inbox"
+uv run python -m a2a-directory call --agent-id my-agent --message "Summarize this inbox"
 ```
 
 ## Use from GitHub Copilot CLI

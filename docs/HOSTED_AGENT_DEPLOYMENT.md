@@ -224,8 +224,8 @@ Direct smoke test:
 ```bash
 cd src
 export APPLICATIONINSIGHTS_CONNECTION_STRING="$APPLICATION_INSIGHTS_CONNECTION_STRING"
-uv run python -m dem333.a2a --search "inbox triage"
-uv run python -m dem333.a2a --agent-id "$HOSTED_AGENT_NAME" --message "Reply exactly DIRECT_A2A_OK."
+uv run python -m dem333.a2a search "inbox triage"
+uv run python -m dem333.a2a call --agent-id "$HOSTED_AGENT_NAME" --message "Reply exactly DIRECT_A2A_OK."
 ```
 
 Run Copilot CLI with the bridge:
